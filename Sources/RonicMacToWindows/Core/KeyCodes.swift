@@ -4,6 +4,8 @@ import CoreGraphics
 /// São literais para que o compilador os trate como constantes no caminho quente do event tap.
 /// Valem para os layouts ANSI e ABNT2 (as letras ficam nas mesmas posições).
 enum Key {
+    static let section: UInt16 = 0x0A  // ISO: à esquerda do Z em teclados de PC (\ |)
+    static let grave: UInt16 = 0x32    // à esquerda do 1 (' " no ABNT2)
     static let a: UInt16 = 0x00
     static let s: UInt16 = 0x01
     static let d: UInt16 = 0x02

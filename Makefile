@@ -1,4 +1,4 @@
-.PHONY: help build dev app universal icons install reset-permission clean
+.PHONY: help build dev app universal icons layouts install reset-permission clean
 
 help:
 	@echo "make build             - compila em modo release (swift build)"
@@ -7,6 +7,7 @@ help:
 	@echo "make universal         - igual a 'make app', binário universal (requer Xcode completo)"
 	@echo "make install           - gera o app e copia para /Applications"
 	@echo "make icons             - regenera o logo, branding/logo.png e Resources/AppIcon.icns"
+	@echo "make layouts           - regenera Resources/Layouts/*.keylayout (pontuação estilo Windows)"
 	@echo "make reset-permission  - apaga a permissão de Acessibilidade do app (use após recompilar)"
 	@echo "make clean             - remove artefatos de build"
 
@@ -30,6 +31,9 @@ install: app
 
 icons:
 	./branding/make-icons.sh
+
+layouts:
+	swift scripts/make-layouts.swift Resources/Layouts
 
 reset-permission:
 	tccutil reset Accessibility io.github.jhowmael.ronicmactowindows

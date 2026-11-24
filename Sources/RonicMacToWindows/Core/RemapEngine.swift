@@ -157,7 +157,8 @@ final class RemapEngine: @unchecked Sendable {
         let pass = Unmanaged.passUnretained(event)
         if event.getIntegerValueField(.eventSourceUserData) == Self.syntheticMarker { return pass }
 
-        let code = Int(event.getIntegerValueField(.keyboardEventKeycode) & 0xFF)
+        let state = SharedState.shared.snapshot
+        let code = swapSectionKeyIfNeeded(event, state)
         let key = UInt16(code)
         let raw = event.flags.rawValue
         let ctrl = raw & Mask.control != 0
@@ -187,7 +188,6 @@ final class RemapEngine: @unchecked Sendable {
             send(.switcherCommit)
         }
 
-        let state = SharedState.shared.snapshot
         guard state.enabled else { return pass }
 
         // ---- Janelas e sistema (valem em todos os apps) ----
@@ -268,7 +268,10 @@ final class RemapEngine: @unchecked Sendable {
         if event.getIntegerValueField(.eventSourceUserData) == Self.syntheticMarker {
             return Unmanaged.passUnretained(event)
         }
-        let code = Int(event.getIntegerValueField(.keyboardEventKeycode) & 0xFF)
+        var code = Int(event.getIntegerValueField(.keyboardEventKeycode) & 0xFF)
+        if code == Int(Key.section) || code == Int(Key.grave) {
+            code = swapSectionKeyIfNeeded(event, SharedState.shared.snapshot)
+        }
         if swallowed[code] {
             swallowed[code] = false
             return nil
@@ -281,6 +284,22 @@ final class RemapEngine: @unchecked Sendable {
     }
 
     // MARK: - Reescrita
+
+    /// Corrige teclados de PC em que a tecla à esquerda do 1 (' ") e a à esquerda do Z (\ |)
+    /// chegam trocadas. Vale em todos os apps (é uma correção física, não um atalho).
+    @inline(__always)
+    private func swapSectionKeyIfNeeded(_ event: CGEvent, _ state: RemapSnapshot) -> Int {
+        let code = Int(event.getIntegerValueField(.keyboardEventKeycode) & 0xFF)
+        guard state.enabled, state.swapSectionKeys else { return code }
+        let swapped: UInt16
+        switch UInt16(code) {
+        case Key.section: swapped = Key.grave
+        case Key.grave: swapped = Key.section
+        default: return code
+        }
+        event.setIntegerValueField(.keyboardEventKeycode, value: Int64(swapped))
+        return Int(swapped)
+    }
 
     private enum FnPad { case keep, set, clear }
 

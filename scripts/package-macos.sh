@@ -10,7 +10,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-VERSION="${VERSION:-1.0.0}"
+VERSION="${VERSION:-1.1.0}"
 SIGN_IDENTITY="${SIGN_IDENTITY:--}"
 DIST="$ROOT/dist"
 APP="$DIST/RonicMacToWindows.app"
@@ -33,6 +33,7 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/RonicMacToWindows" "$APP/Contents/MacOS/RonicMacToWindows"
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 cp "$ROOT/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
+cp -R "$ROOT/Resources/Layouts" "$APP/Contents/Resources/Layouts"   # layouts de pontuação estilo Windows
 plutil -replace CFBundleShortVersionString -string "$VERSION" "$APP/Contents/Info.plist"
 plutil -replace CFBundleVersion -string "$(date +%Y%m%d%H%M)" "$APP/Contents/Info.plist"
 strip -x "$APP/Contents/MacOS/RonicMacToWindows" 2>/dev/null || true

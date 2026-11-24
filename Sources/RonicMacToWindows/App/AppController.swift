@@ -78,6 +78,25 @@ final class AppController {
         syncState()
     }
 
+    func toggleSwapSectionKeys() {
+        settings.swapSectionKeys.toggle()
+        syncState()
+    }
+
+    /// Instala/ativa um layout de pontuação estilo Windows; mostra o erro se o macOS recusar.
+    func activateLayout(_ layout: WindowsLayout) {
+        do {
+            try KeyboardLayoutManager.activate(layout)
+        } catch {
+            NSApp.activate()
+            let alert = NSAlert()
+            alert.alertStyle = .warning
+            alert.messageText = "Não foi possível ativar “\(layout.title)”"
+            alert.informativeText = error.localizedDescription
+            alert.runModal()
+        }
+    }
+
     func addExclusion(_ bundleID: String) {
         settings.addExclusion(bundleID)
         syncExclusion()
@@ -99,10 +118,12 @@ final class AppController {
         let enabled = settings.isEnabled
         let groups = settings.groups
         let excluded = settings.isExcluded(tracker.currentBundleID)
+        let swapKeys = settings.swapSectionKeys
         SharedState.shared.update {
             $0.enabled = enabled
             $0.groups = groups
             $0.frontmostExcluded = excluded
+            $0.swapSectionKeys = swapKeys
         }
     }
 

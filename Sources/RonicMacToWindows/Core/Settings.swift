@@ -21,6 +21,12 @@ final class Settings {
     private enum Keys {
         static let groups = "shortcutGroups"
         static let excluded = "excludedBundleIDs"
+        static let swapSectionKeys = "swapSectionKeys"
+    }
+
+    /// Desfaz a troca física das teclas ' " e \ | em teclados de PC.
+    var swapSectionKeys: Bool {
+        didSet { defaults.set(swapSectionKeys, forKey: Keys.swapSectionKeys) }
     }
 
     private let defaults = UserDefaults.standard
@@ -41,6 +47,7 @@ final class Settings {
         } else {
             groups = .all
         }
+        swapSectionKeys = defaults.bool(forKey: Keys.swapSectionKeys)
         let excluded = defaults.stringArray(forKey: Keys.excluded) ?? Self.defaultExcludedBundleIDs
         excludedBundleIDs = excluded
         excludedSet = Set(excluded)

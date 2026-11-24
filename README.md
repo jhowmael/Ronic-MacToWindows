@@ -85,6 +85,23 @@ Nesta tabela, **Alt = Option (⌥)** e **Win = Command (⌘)**. É assim que o m
 
 **Não é afetado:** a digitação de acentos e caracteres especiais (´ ~ ^ ` ç, Option+letra) e os seus atalhos ⌘ nativos. O ⌘C continua funcionando. As exceções são ⌘L e ⌘D, que viram Win+L e Win+D. Para usá-los como no Mac, desligue o grupo **Tecla Win** no menu.
 
+## Pontuação e acentos como no Windows
+
+Os layouts de teclado do Mac têm diferenças pequenas em relação aos do Windows, mas que atrapalham quem já tem a memória muscular. No ABNT2 do Mac, por exemplo, `~` + espaço gera `˜` (til pequeno) em vez de `~`, AltGr+E gera `€` em vez de `°`, e o Option produz `≤ ≥ … –` em teclas onde o Windows não produz nada.
+
+Em **menu › Layout do teclado (pontuação)**, escolha um destes layouts. Eles reproduzem os do Windows e foram gerados a partir das tabelas `KBDBR.DLL`, `KBDUSX.DLL` e `KBDUS.DLL`:
+
+| Layout | Para quem | Igual ao Windows |
+|---|---|---|
+| **ABNT2 (Windows)** | Teclado brasileiro com **Ç** | `´` `` ` `` `~` `^` `¨` mortos. `~`+espaço = `~`. AltGr+Q/W/E/C = `/ ? ° ₢`. AltGr+1…6 = `¹ ² ³ £ ¢ ¬`, AltGr+= = `§`, AltGr+[ ] = `ª º`, numpad com `,` |
+| **US Internacional (Windows)** | Teclado americano, escrevendo em português | `'`+`c` = `ç`, `'`+`a` = `á`, `"`+`u` = `ü`, `~`+`a` = `ã`, `'`+espaço = `'`. AltGr+Q = `ä`, AltGr+, = `ç`, AltGr+5 = `€`… |
+| **US (Windows)** | Teclado americano sem acentos | Sem teclas mortas. AltGr não digita nada |
+
+* O app instala o layout em `~/Library/Keyboard Layouts`, sem pedir senha de administrador, e o ativa na hora. Ele passa a aparecer também no menu de fontes de entrada do macOS, e **Voltar para "…"** restaura o layout anterior.
+* Por ser um layout do próprio macOS, os acentos funcionam **em todos os apps**, inclusive no Terminal, com latência zero.
+* Também como no Windows: **Caps Lock + Shift + letra = minúscula**, e duas teclas mortas seguidas saem juntas (`~~`).
+* **Teclado de PC com `'` e `\` trocados?** Em alguns teclados ABNT2/ISO, o macOS inverte a tecla à esquerda do **1** com a tecla à esquerda do **Z**. Ative **Corrigir teclas ' e \ trocadas** no mesmo menu.
+
 ## Menu na barra superior
 
 | Item | O que faz |
@@ -92,6 +109,7 @@ Nesta tabela, **Alt = Option (⌥)** e **Win = Command (⌘)**. É assim que o m
 | **Pausar / Ativar remapeamento** | Desliga a captura de teclado por completo (custo zero) e liga de novo. O ícone fica apagado quando pausado. |
 | **Acessibilidade** | Mostra se a permissão foi concedida e tem um botão que abre os Ajustes. |
 | **Atalhos** | Liga e desliga cada grupo: Edição, Navegação de texto, Janelas, Tecla Win. |
+| **Layout do teclado (pontuação)** | ABNT2, US Internacional ou US no padrão Windows. Mostra o layout em uso e permite voltar ao anterior. Tem a correção das teclas `'` e `\` trocadas. |
 | **Apps ignorados** | **Ignorar "App atual"** com um clique, **Adicionar app…** escolhendo um .app, clique num item para remover, **Restaurar padrões**. |
 | **Sair** | Encerra o app (⌘Q com o menu aberto). |
 
@@ -135,7 +153,8 @@ Já vêm ignorados: Terminal, iTerm2, Warp, Ghostty, kitty, Alacritty, WezTerm, 
 ├── Package.swift                         Swift Package (macOS 14+)
 ├── Resources/
 │   ├── Info.plist                        LSUIElement = true (sem Dock), bundle id, versão
-│   └── AppIcon.icns                      gerado por branding/make-icons.sh
+│   ├── AppIcon.icns                      gerado por branding/make-icons.sh
+│   └── Layouts/*.keylayout               ABNT2 / US Internacional / US no padrão Windows
 ├── Sources/RonicMacToWindows/
 │   ├── main.swift                        ponto de entrada (.accessory)
 │   ├── App/
@@ -150,12 +169,15 @@ Já vêm ignorados: Terminal, iTerm2, Warp, Ghostty, kitty, Alacritty, WezTerm, 
 │   ├── Services/
 │   │   ├── FrontmostAppTracker.swift     app ativo + ordem de uso (MRU)
 │   │   ├── AccessibilityPermission.swift status/pedido da permissão
+│   │   ├── KeyboardLayoutManager.swift   instala/ativa os layouts de pontuação
 │   │   └── SystemActions.swift           bloquear tela, mostrar mesa, captura, Monitor de Atividade
 │   └── Switcher/
 │       ├── AppSwitcher.swift             lógica do Alt+Tab
 │       └── SwitcherPanel.swift           painel flutuante com os ícones
 ├── branding/                             logo gerado por código + script de ícones
-├── scripts/package-macos.sh              gera o .app e o .zip
+├── scripts/
+│   ├── package-macos.sh                  gera o .app e o .zip
+│   └── make-layouts.swift                gera os .keylayout a partir das regras do Windows
 └── .github/workflows/release.yml         publica o download ao criar uma tag
 ```
 
@@ -170,6 +192,7 @@ cd Ronic-MacToWindows
 make app       # → dist/RonicMacToWindows.app + dist/RonicMacToWindows-macOS.zip
 make install   # gera e copia para /Applications
 make icons     # regenera o logo e o AppIcon.icns
+make layouts   # regenera os layouts de pontuação (Resources/Layouts)
 ```
 
 ### Testar
@@ -179,8 +202,9 @@ make icons     # regenera o logo e o AppIcon.icns
 3. No **TextEdit** ou nas **Notas**: digite um texto e teste Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+Z, Ctrl+Y, Home/End, Shift+Home, Ctrl+←/→ e Ctrl+Backspace.
 4. Digite acentos (á, ã, ç, ê) e confira que nada mudou.
 5. Teste Alt+Tab com 3 ou mais apps abertos, Win+D duas vezes e Ctrl+Shift+Esc.
-6. No **Terminal**, rode `sleep 100` e aperte **Ctrl+C**. O processo deve ser interrompido, porque o Terminal é ignorado por padrão.
-7. Pelo menu, teste **Pausar**, desligar um grupo, **Ignorar "app atual"** e **Sair**.
+6. Em **Layout do teclado**, escolha **ABNT2 (Windows)** e digite `~` + espaço (deve sair `~`), `~` + `a` (`ã`) e AltGr+Q (`/`). Depois use **Voltar para "…"**.
+7. No **Terminal**, rode `sleep 100` e aperte **Ctrl+C**. O processo deve ser interrompido, porque o Terminal é ignorado por padrão.
+8. Pelo menu, teste **Pausar**, desligar um grupo, **Ignorar "app atual"** e **Sair**.
 
 > **Recompilou?** Uma assinatura ad-hoc nova invalida a permissão anterior. Rode `make reset-permission` e autorize de novo. Para não precisar repetir isso a cada build, assine sempre com o mesmo certificado: `SIGN_IDENTITY="Nome do certificado" make app`. Serve até um certificado autoassinado criado no **Acesso às Chaves › Assistente de Certificado**, do tipo *Assinatura de Código*.
 

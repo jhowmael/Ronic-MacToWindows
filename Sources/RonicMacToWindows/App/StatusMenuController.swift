@@ -85,6 +85,12 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
         groups.submenu = buildGroupsMenu()
         menu.addItem(groups)
 
+        // Layout de pontuação
+        let layouts = NSMenuItem(title: "Layout do teclado (pontuação)", action: nil, keyEquivalent: "")
+        layouts.image = symbol("character.cursor.ibeam")
+        layouts.submenu = buildLayoutMenu()
+        menu.addItem(layouts)
+
         // Apps ignorados
         let ignored = NSMenuItem(title: "Apps ignorados", action: nil, keyEquivalent: "")
         ignored.image = symbol("nosign")
@@ -110,6 +116,37 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
             it.state = controller.settings.groups.contains(group) ? .on : .off
             sub.addItem(it)
         }
+        return sub
+    }
+
+    private func buildLayoutMenu() -> NSMenu {
+        let sub = NSMenu()
+        sub.autoenablesItems = false
+        let active = KeyboardLayoutManager.currentWindowsLayout
+
+        for layout in WindowsLayout.allCases {
+            let it = item(layout.title, #selector(chooseLayout(_:)))
+            it.representedObject = layout.rawValue
+            it.state = layout == active ? .on : .off
+            it.toolTip = layout.hint
+            if #available(macOS 14.4, *) { it.subtitle = layout.hint }
+            sub.addItem(it)
+        }
+
+        sub.addItem(.separator())
+        let current = NSMenuItem(title: "Em uso: \(KeyboardLayoutManager.currentSourceName ?? "—")", action: nil, keyEquivalent: "")
+        current.isEnabled = false
+        sub.addItem(current)
+        if active != nil, let previous = KeyboardLayoutManager.previousSourceName {
+            sub.addItem(item("Voltar para “\(previous)”", #selector(restoreLayout), symbol: "arrow.uturn.backward"))
+        }
+
+        sub.addItem(.separator())
+        let swap = item("Corrigir teclas ' e \\ trocadas (teclado de PC)", #selector(toggleSwapSectionKeys))
+        swap.state = controller.settings.swapSectionKeys ? .on : .off
+        swap.toolTip = "Use se a tecla à esquerda do 1 digitar \\ e a tecla à esquerda do Z digitar '"
+        sub.addItem(swap)
+        sub.addItem(item("Ajustes de Teclado do macOS…", #selector(openKeyboardSettings), symbol: "gearshape"))
         return sub
     }
 
@@ -167,6 +204,17 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
         guard let raw = sender.representedObject as? Int else { return }
         controller.toggleGroup(ShortcutGroups(rawValue: UInt8(raw)))
     }
+
+    @objc private func chooseLayout(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String, let layout = WindowsLayout(rawValue: raw) else { return }
+        controller.activateLayout(layout)
+    }
+
+    @objc private func restoreLayout() { KeyboardLayoutManager.restorePrevious() }
+
+    @objc private func toggleSwapSectionKeys() { controller.toggleSwapSectionKeys() }
+
+    @objc private func openKeyboardSettings() { KeyboardLayoutManager.openInputSourceSettings() }
 
     @objc private func addExclusion(_ sender: NSMenuItem) {
         guard let id = sender.representedObject as? String else { return }
