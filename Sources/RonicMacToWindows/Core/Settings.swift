@@ -22,14 +22,6 @@ final class Settings {
         static let groups = "shortcutGroups"
         static let excluded = "excludedBundleIDs"
         static let knownGroups = "knownShortcutGroups"
-        static let accessibilityGranted = "accessibilityGrantedBefore"
-    }
-
-    /// Já tivemos permissão de Acessibilidade alguma vez? Se sim e agora não temos, quase sempre
-    /// é a "chave órfã" de uma versão anterior do app (ver AppController.start).
-    var accessibilityGrantedBefore: Bool {
-        get { defaults.bool(forKey: Keys.accessibilityGranted) }
-        set { defaults.set(newValue, forKey: Keys.accessibilityGranted) }
     }
 
     private let defaults = UserDefaults.standard

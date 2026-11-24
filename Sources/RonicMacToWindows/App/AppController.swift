@@ -30,14 +30,11 @@ final class AppController {
         }
 
         if !AccessibilityPermission.isTrusted {
-            if settings.accessibilityGrantedBefore {
-                // Já tivemos permissão e agora não temos: quase sempre é uma atualização do app.
-                // A chave em Ajustes › Acessibilidade continua ligada, mas pertence ao binário
-                // anterior, e ligar/desligar não resolve. Removemos a entrada órfã para o macOS
-                // pedir de novo — o usuário só precisa ligar a chave.
-                settings.accessibilityGrantedBefore = false
-                AccessibilityPermission.resetEntry()
-            }
+            // Sem permissão ao abrir: quase sempre é uma atualização do app. A chave em
+            // Ajustes › Acessibilidade continua ligada, mas pertence ao binário anterior, e
+            // ligar/desligar não resolve. Removemos a entrada (órfã ou desligada) e pedimos de
+            // novo: o usuário só precisa ligar a chave. Sem entrada, o reset não faz nada.
+            AccessibilityPermission.resetEntry()
             AccessibilityPermission.requestPrompt()
         }
         refreshPermissionAndEngine()
@@ -58,7 +55,6 @@ final class AppController {
         }
 
         if engine.isRunning {
-            settings.accessibilityGrantedBefore = true
             permissionTimer?.invalidate()
             permissionTimer = nil
         } else if permissionTimer == nil {
