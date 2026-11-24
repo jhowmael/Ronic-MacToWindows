@@ -11,6 +11,26 @@ enum AccessibilityPermission {
         _ = AXIsProcessTrustedWithOptions(options)
     }
 
+    /// Remove a entrada do app em Ajustes › Acessibilidade (`tccutil reset`, não precisa de admin).
+    /// Necessário depois de atualizar: a chave antiga aparece ligada, mas o macOS a amarrou à
+    /// assinatura do binário anterior e não a aplica ao novo.
+    @discardableResult
+    static func resetEntry() -> Bool {
+        guard let id = Bundle.main.bundleIdentifier else { return false }
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/tccutil")
+        task.arguments = ["reset", "Accessibility", id]
+        task.standardOutput = FileHandle.nullDevice
+        task.standardError = FileHandle.nullDevice
+        do {
+            try task.run()
+            task.waitUntilExit()
+            return task.terminationStatus == 0
+        } catch {
+            return false
+        }
+    }
+
     static func openSystemSettings() {
         let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!
         NSWorkspace.shared.open(url)

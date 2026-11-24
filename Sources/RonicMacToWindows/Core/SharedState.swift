@@ -13,7 +13,10 @@ struct ShortcutGroups: OptionSet, Sendable {
     /// Win+L, Win+D (Win = ⌘)
     static let winKey = ShortcutGroups(rawValue: 1 << 3)
 
-    static let all: ShortcutGroups = [.editing, .textNavigation, .windows, .winKey]
+    /// PrtSc, Win+Shift+S, ⇧⌘3 e ⇧⌘4 → print direto na área de transferência
+    static let screenshots = ShortcutGroups(rawValue: 1 << 4)
+
+    static let all: ShortcutGroups = [.editing, .textNavigation, .windows, .winKey, .screenshots]
 }
 
 /// Tudo o que o callback do event tap precisa saber, num único valor pequeno.
@@ -21,9 +24,6 @@ struct RemapSnapshot: Sendable {
     var enabled = true
     var frontmostExcluded = false
     var groups: ShortcutGroups = .all
-    /// Teclados de PC (ABNT2/ISO) em que o macOS troca a tecla à esquerda do 1 com a
-    /// tecla à esquerda do Z: desfaz a troca trocando os keyCodes 0x0A ↔ 0x32.
-    var swapSectionKeys = false
 }
 
 /// Ponte entre a thread principal (que escreve quando algo muda) e a thread do event tap

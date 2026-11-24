@@ -41,7 +41,10 @@
 3. Autorize a **Acessibilidade**: em **Ajustes do Sistema › Privacidade e Segurança › Acessibilidade**, ative **RonicMacToWindows**. O próprio app abre esse painel. A captura começa sozinha assim que você autoriza, sem precisar reabrir o app.
 4. Pronto. O ícone **R** aparece na barra superior, no canto direito.
 
-> **Atualizou o app e os atalhos pararam?** Cada versão é um binário novo, e o macOS passa a tratá-la como outro app. Em **Acessibilidade**, remova o RonicMacToWindows (botão **–**) e adicione de novo. Também dá para rodar `tccutil reset Accessibility io.github.jhowmael.ronicmactowindows` e abrir o app.
+> **Ativei a Acessibilidade e o app continua dizendo "não autorizada"?** Isso acontece depois de atualizar o app. O macOS amarra a permissão à assinatura do binário, então a chave nos Ajustes continua ligada, mas pertence à versão anterior. Ligar e desligar a chave não resolve.
+> * O app detecta isso ao abrir: remove a entrada antiga e pede a permissão de novo. Basta ligar a chave outra vez.
+> * Se ainda não funcionar, abra o menu do app e clique em **Já ativei e não funciona: redefinir permissão**. Se a permissão aparecer como autorizada mas os atalhos não voltarem, use **Reabrir o app**.
+> * Pelo Terminal: `tccutil reset Accessibility io.github.jhowmael.ronicmactowindows` e abra o app.
 
 ## Atalhos
 
@@ -80,36 +83,33 @@ Nesta tabela, **Alt = Option (⌥)** e **Win = Command (⌘)**. É assim que o m
 | Alt+F4 | Encerra o app ativo (⌘Q, então o app ainda pergunta se quer salvar) |
 | **Win+L** | Bloqueia a tela |
 | **Win+D** | Mostra a área de trabalho (aperte de novo para voltar) |
-| Print Screen | Abre a ferramenta de captura de tela (como ⇧⌘5) |
 | Ctrl+Shift+Esc | Abre o Monitor de Atividade (o "Gerenciador de Tarefas") |
 
 **Não é afetado:** a digitação de acentos e caracteres especiais (´ ~ ^ ` ç, Option+letra) e os seus atalhos ⌘ nativos. O ⌘C continua funcionando. As exceções são ⌘L e ⌘D, que viram Win+L e Win+D. Para usá-los como no Mac, desligue o grupo **Tecla Win** no menu.
 
-## Pontuação e acentos como no Windows
+### Prints direto na área de transferência
 
-Os layouts de teclado do Mac têm diferenças pequenas em relação aos do Windows, mas que atrapalham quem já tem a memória muscular. No ABNT2 do Mac, por exemplo, `~` + espaço gera `˜` (til pequeno) em vez de `~`, AltGr+E gera `€` em vez de `°`, e o Option produz `≤ ≥ … –` em teclas onde o Windows não produz nada.
+Como no Windows, o print vai **direto para a área de transferência**. É só colar com Ctrl+V onde quiser.
 
-Em **menu › Layout do teclado (pontuação)**, escolha um destes layouts. Eles reproduzem os do Windows e foram gerados a partir das tabelas `KBDBR.DLL`, `KBDUSX.DLL` e `KBDUS.DLL`:
+| Tecla | Captura |
+|---|---|
+| **Print Screen** | Recorte de área, como a Ferramenta de Captura do Windows 11. Aperte Espaço para capturar uma janela |
+| **Shift+Print Screen** | Tela inteira |
+| **Win+Shift+S** | Recorte de área, como no Windows |
+| **⇧⌘4** / **⇧⌘3** (atalhos do Mac) | Também vão para a área de transferência, em vez de virar arquivo na Mesa |
 
-| Layout | Para quem | Igual ao Windows |
-|---|---|---|
-| **ABNT2 (Windows)** | Teclado brasileiro com **Ç** | `´` `` ` `` `~` `^` `¨` mortos. `~`+espaço = `~`. AltGr+Q/W/E/C = `/ ? ° ₢`. AltGr+1…6 = `¹ ² ³ £ ¢ ¬`, AltGr+= = `§`, AltGr+[ ] = `ª º`, numpad com `,` |
-| **US Internacional (Windows)** | Teclado americano, escrevendo em português | `'`+`c` = `ç`, `'`+`a` = `á`, `"`+`u` = `ü`, `~`+`a` = `ã`, `'`+espaço = `'`. AltGr+Q = `ä`, AltGr+, = `ç`, AltGr+5 = `€`… |
-| **US (Windows)** | Teclado americano sem acentos | Sem teclas mortas. AltGr não digita nada |
-
-* O app instala o layout em `~/Library/Keyboard Layouts`, sem pedir senha de administrador, e o ativa na hora. Ele passa a aparecer também no menu de fontes de entrada do macOS, e **Voltar para "…"** restaura o layout anterior.
-* Por ser um layout do próprio macOS, os acentos funcionam **em todos os apps**, inclusive no Terminal, com latência zero.
-* Também como no Windows: **Caps Lock + Shift + letra = minúscula**, e duas teclas mortas seguidas saem juntas (`~~`).
-* **Teclado de PC com `'` e `\` trocados?** Em alguns teclados ABNT2/ISO, o macOS inverte a tecla à esquerda do **1** com a tecla à esquerda do **Z**. Ative **Corrigir teclas ' e \ trocadas** no mesmo menu.
+* Liga e desliga em **menu › Atalhos › Prints → área de transferência**. Desligado, o Print Screen abre a barra de captura (⇧⌘5) e os atalhos do Mac voltam a salvar arquivo.
+* Funciona em todos os apps, inclusive nos ignorados. Quem captura é o próprio macOS (⌃⇧⌘3/4), então o app **não precisa** da permissão de Gravação de Tela.
+* ⇧⌘5 (barra de captura) não é alterado. Nele, o destino é escolhido em **Opções**.
+* Win+Shift+S usa o ⇧⌘S físico. O "Salvar como" pelo jeito Windows (**Ctrl+Shift+S**) continua funcionando.
 
 ## Menu na barra superior
 
 | Item | O que faz |
 |---|---|
 | **Pausar / Ativar remapeamento** | Desliga a captura de teclado por completo (custo zero) e liga de novo. O ícone fica apagado quando pausado. |
-| **Acessibilidade** | Mostra se a permissão foi concedida e tem um botão que abre os Ajustes. |
-| **Atalhos** | Liga e desliga cada grupo: Edição, Navegação de texto, Janelas, Tecla Win. |
-| **Layout do teclado (pontuação)** | ABNT2, US Internacional ou US no padrão Windows. Mostra o layout em uso e permite voltar ao anterior. Tem a correção das teclas `'` e `\` trocadas. |
+| **Acessibilidade** | Mostra se a permissão foi concedida, abre os Ajustes e tem **Redefinir permissão** para quando a chave fica ligada mas não vale (depois de atualizar). |
+| **Atalhos** | Liga e desliga cada grupo: Edição, Navegação de texto, Janelas, Tecla Win, Prints → área de transferência. |
 | **Apps ignorados** | **Ignorar "App atual"** com um clique, **Adicionar app…** escolhendo um .app, clique num item para remover, **Restaurar padrões**. |
 | **Sair** | Encerra o app (⌘Q com o menu aberto). |
 
@@ -153,8 +153,7 @@ Já vêm ignorados: Terminal, iTerm2, Warp, Ghostty, kitty, Alacritty, WezTerm, 
 ├── Package.swift                         Swift Package (macOS 14+)
 ├── Resources/
 │   ├── Info.plist                        LSUIElement = true (sem Dock), bundle id, versão
-│   ├── AppIcon.icns                      gerado por branding/make-icons.sh
-│   └── Layouts/*.keylayout               ABNT2 / US Internacional / US no padrão Windows
+│   └── AppIcon.icns                      gerado por branding/make-icons.sh
 ├── Sources/RonicMacToWindows/
 │   ├── main.swift                        ponto de entrada (.accessory)
 │   ├── App/
@@ -169,7 +168,6 @@ Já vêm ignorados: Terminal, iTerm2, Warp, Ghostty, kitty, Alacritty, WezTerm, 
 │   ├── Services/
 │   │   ├── FrontmostAppTracker.swift     app ativo + ordem de uso (MRU)
 │   │   ├── AccessibilityPermission.swift status/pedido da permissão
-│   │   ├── KeyboardLayoutManager.swift   instala/ativa os layouts de pontuação
 │   │   └── SystemActions.swift           bloquear tela, mostrar mesa, captura, Monitor de Atividade
 │   └── Switcher/
 │       ├── AppSwitcher.swift             lógica do Alt+Tab
@@ -177,7 +175,7 @@ Já vêm ignorados: Terminal, iTerm2, Warp, Ghostty, kitty, Alacritty, WezTerm, 
 ├── branding/                             logo gerado por código + script de ícones
 ├── scripts/
 │   ├── package-macos.sh                  gera o .app e o .zip
-│   └── make-layouts.swift                gera os .keylayout a partir das regras do Windows
+│   └── dev-signing.sh                    certificado local estável (permissão sobrevive a recompilar)
 └── .github/workflows/release.yml         publica o download ao criar uma tag
 ```
 
@@ -192,7 +190,6 @@ cd Ronic-MacToWindows
 make app       # → dist/RonicMacToWindows.app + dist/RonicMacToWindows-macOS.zip
 make install   # gera e copia para /Applications
 make icons     # regenera o logo e o AppIcon.icns
-make layouts   # regenera os layouts de pontuação (Resources/Layouts)
 ```
 
 ### Testar
@@ -202,11 +199,11 @@ make layouts   # regenera os layouts de pontuação (Resources/Layouts)
 3. No **TextEdit** ou nas **Notas**: digite um texto e teste Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+Z, Ctrl+Y, Home/End, Shift+Home, Ctrl+←/→ e Ctrl+Backspace.
 4. Digite acentos (á, ã, ç, ê) e confira que nada mudou.
 5. Teste Alt+Tab com 3 ou mais apps abertos, Win+D duas vezes e Ctrl+Shift+Esc.
-6. Em **Layout do teclado**, escolha **ABNT2 (Windows)** e digite `~` + espaço (deve sair `~`), `~` + `a` (`ã`) e AltGr+Q (`/`). Depois use **Voltar para "…"**.
+6. Aperte **Win+Shift+S** (ou Print Screen), recorte uma área e cole com Ctrl+V no TextEdit.
 7. No **Terminal**, rode `sleep 100` e aperte **Ctrl+C**. O processo deve ser interrompido, porque o Terminal é ignorado por padrão.
 8. Pelo menu, teste **Pausar**, desligar um grupo, **Ignorar "app atual"** e **Sair**.
 
-> **Recompilou?** Uma assinatura ad-hoc nova invalida a permissão anterior. Rode `make reset-permission` e autorize de novo. Para não precisar repetir isso a cada build, assine sempre com o mesmo certificado: `SIGN_IDENTITY="Nome do certificado" make app`. Serve até um certificado autoassinado criado no **Acesso às Chaves › Assistente de Certificado**, do tipo *Assinatura de Código*.
+> **Recompilou?** Na sua máquina, `make app` assina sempre com o mesmo certificado local (`scripts/dev-signing.sh`, guardado em `~/.ronic-mirror-signing` e compartilhado com o Ronic Mirror). Assim a permissão de Acessibilidade **continua valendo depois de recompilar**. No CI, a assinatura é ad-hoc, e o app trata a troca de versão sozinho, como descrito em [Instalação](#instalação).
 
 ## Publicar uma nova versão
 

@@ -30,6 +30,14 @@ final class AppController {
         }
 
         if !AccessibilityPermission.isTrusted {
+            if settings.accessibilityGrantedBefore {
+                // Já tivemos permissão e agora não temos: quase sempre é uma atualização do app.
+                // A chave em Ajustes › Acessibilidade continua ligada, mas pertence ao binário
+                // anterior, e ligar/desligar não resolve. Removemos a entrada órfã para o macOS
+                // pedir de novo — o usuário só precisa ligar a chave.
+                settings.accessibilityGrantedBefore = false
+                AccessibilityPermission.resetEntry()
+            }
             AccessibilityPermission.requestPrompt()
         }
         refreshPermissionAndEngine()
@@ -50,6 +58,7 @@ final class AppController {
         }
 
         if engine.isRunning {
+            settings.accessibilityGrantedBefore = true
             permissionTimer?.invalidate()
             permissionTimer = nil
         } else if permissionTimer == nil {
@@ -61,6 +70,24 @@ final class AppController {
             permissionTimer = timer
         }
         statusMenu.refreshIcon()
+    }
+
+    /// "Ativei e continua não autorizado": remove a entrada antiga, pede de novo e abre os Ajustes.
+    func resetPermission() {
+        AccessibilityPermission.resetEntry()
+        AccessibilityPermission.requestPrompt()
+        AccessibilityPermission.openSystemSettings()
+        refreshPermissionAndEngine()
+    }
+
+    /// Reabre o app (último recurso quando o macOS só libera a captura num processo novo).
+    func relaunch() {
+        let path = Bundle.main.bundlePath
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/bin/sh")
+        task.arguments = ["-c", "sleep 0.7; /usr/bin/open \"$0\"", path]
+        try? task.run()
+        NSApp.terminate(nil)
     }
 
     // MARK: - Ações do menu
@@ -76,25 +103,6 @@ final class AppController {
     func toggleGroup(_ group: ShortcutGroups) {
         settings.groups.formSymmetricDifference(group)
         syncState()
-    }
-
-    func toggleSwapSectionKeys() {
-        settings.swapSectionKeys.toggle()
-        syncState()
-    }
-
-    /// Instala/ativa um layout de pontuação estilo Windows; mostra o erro se o macOS recusar.
-    func activateLayout(_ layout: WindowsLayout) {
-        do {
-            try KeyboardLayoutManager.activate(layout)
-        } catch {
-            NSApp.activate()
-            let alert = NSAlert()
-            alert.alertStyle = .warning
-            alert.messageText = "Não foi possível ativar “\(layout.title)”"
-            alert.informativeText = error.localizedDescription
-            alert.runModal()
-        }
     }
 
     func addExclusion(_ bundleID: String) {
@@ -118,12 +126,10 @@ final class AppController {
         let enabled = settings.isEnabled
         let groups = settings.groups
         let excluded = settings.isExcluded(tracker.currentBundleID)
-        let swapKeys = settings.swapSectionKeys
         SharedState.shared.update {
             $0.enabled = enabled
             $0.groups = groups
             $0.frontmostExcluded = excluded
-            $0.swapSectionKeys = swapKeys
         }
     }
 
@@ -143,6 +149,7 @@ final class AppController {
         case .lockScreen: SystemActions.lockScreen()
         case .showDesktop: SystemActions.showDesktop()
         case .screenshot: SystemActions.openScreenshotTool()
+        case .screenshotToClipboard(let fullScreen): SystemActions.screenshotToClipboard(fullScreen: fullScreen)
         case .taskManager: SystemActions.openTaskManager()
         }
     }

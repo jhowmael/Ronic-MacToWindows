@@ -48,6 +48,13 @@ enum SystemActions {
         }
     }
 
+    /// Print direto para a área de transferência, como no Windows: dispara o atalho nativo
+    /// ⌃⇧⌘3 (tela inteira) ou ⌃⇧⌘4 (recorte; Espaço alterna para "janela").
+    /// A captura é feita pelo próprio macOS, sem pedir permissão de Gravação de Tela ao app.
+    static func screenshotToClipboard(fullScreen: Bool) {
+        postShortcut(fullScreen ? Key.three : Key.four, flags: [.maskControl, .maskCommand, .maskShift])
+    }
+
     /// Ctrl+Shift+Esc — Monitor de Atividade, o "Gerenciador de Tarefas" do Mac.
     static func openTaskManager() {
         _ = openApp(at: "/System/Applications/Utilities/Activity Monitor.app")

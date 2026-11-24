@@ -21,12 +21,15 @@ final class Settings {
     private enum Keys {
         static let groups = "shortcutGroups"
         static let excluded = "excludedBundleIDs"
-        static let swapSectionKeys = "swapSectionKeys"
+        static let knownGroups = "knownShortcutGroups"
+        static let accessibilityGranted = "accessibilityGrantedBefore"
     }
 
-    /// Desfaz a troca física das teclas ' " e \ | em teclados de PC.
-    var swapSectionKeys: Bool {
-        didSet { defaults.set(swapSectionKeys, forKey: Keys.swapSectionKeys) }
+    /// Já tivemos permissão de Acessibilidade alguma vez? Se sim e agora não temos, quase sempre
+    /// é a "chave órfã" de uma versão anterior do app (ver AppController.start).
+    var accessibilityGrantedBefore: Bool {
+        get { defaults.bool(forKey: Keys.accessibilityGranted) }
+        set { defaults.set(newValue, forKey: Keys.accessibilityGranted) }
     }
 
     private let defaults = UserDefaults.standard
@@ -35,7 +38,10 @@ final class Settings {
     var isEnabled = true
 
     var groups: ShortcutGroups {
-        didSet { defaults.set(Int(groups.rawValue), forKey: Keys.groups) }
+        didSet {
+            defaults.set(Int(groups.rawValue), forKey: Keys.groups)
+            defaults.set(Int(ShortcutGroups.all.rawValue), forKey: Keys.knownGroups)
+        }
     }
 
     private(set) var excludedBundleIDs: [String]
@@ -43,11 +49,13 @@ final class Settings {
 
     init() {
         if let stored = defaults.object(forKey: Keys.groups) as? Int {
-            groups = ShortcutGroups(rawValue: UInt8(truncatingIfNeeded: stored))
+            // Grupos criados em versões mais novas começam ligados, mesmo para quem já tinha
+            // preferências salvas (a 1.0/1.1 só conheciam os 4 primeiros grupos).
+            let known = ShortcutGroups(rawValue: UInt8(truncatingIfNeeded: defaults.object(forKey: Keys.knownGroups) as? Int ?? 0b1111))
+            groups = ShortcutGroups(rawValue: UInt8(truncatingIfNeeded: stored)).union(ShortcutGroups.all.subtracting(known))
         } else {
             groups = .all
         }
-        swapSectionKeys = defaults.bool(forKey: Keys.swapSectionKeys)
         let excluded = defaults.stringArray(forKey: Keys.excluded) ?? Self.defaultExcludedBundleIDs
         excludedBundleIDs = excluded
         excludedSet = Set(excluded)

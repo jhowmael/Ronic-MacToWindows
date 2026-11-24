@@ -11,6 +11,7 @@ enum EngineAction {
     case lockScreen
     case showDesktop
     case screenshot
+    case screenshotToClipboard(fullScreen: Bool)
     case taskManager
 }
 
@@ -158,7 +159,7 @@ final class RemapEngine: @unchecked Sendable {
         if event.getIntegerValueField(.eventSourceUserData) == Self.syntheticMarker { return pass }
 
         let state = SharedState.shared.snapshot
-        let code = swapSectionKeyIfNeeded(event, state)
+        let code = Int(event.getIntegerValueField(.keyboardEventKeycode) & 0xFF)
         let key = UInt16(code)
         let raw = event.flags.rawValue
         let ctrl = raw & Mask.control != 0
@@ -204,7 +205,8 @@ final class RemapEngine: @unchecked Sendable {
                     return rewrite(event, code, to: Key.q, mods: Mask.outCommand, fnPad: .clear, char: KeyChar.q)
                 }
             }
-            if key == Key.f13 && !cmd && !ctrl && !opt {
+            if key == Key.f13 && !cmd && !ctrl && !opt && !state.groups.contains(.screenshots) {
+                // Prints → clipboard desligado: PrtSc abre a barra de captura (⇧⌘5).
                 swallowed[code] = true
                 send(.screenshot)
                 return nil
@@ -213,6 +215,32 @@ final class RemapEngine: @unchecked Sendable {
                 swallowed[code] = true
                 send(.taskManager)
                 return nil
+            }
+        }
+
+        // ---- Prints direto para a área de transferência (todos os apps) ----
+        // Usa os atalhos nativos ⌃⇧⌘3 / ⌃⇧⌘4 do macOS ("copiar para a área de transferência"):
+        // nenhuma permissão extra de Gravação de Tela é necessária.
+        if state.groups.contains(.screenshots) && !ctrl && !opt {
+            if key == Key.f13 && !cmd {
+                // PrtSc → recorte de área, como o Win+Shift+S / Ferramenta de Captura do Windows 11
+                swallowed[code] = true
+                send(.screenshotToClipboard(fullScreen: shift))   // Shift+PrtSc = tela inteira
+                return nil
+            }
+            if cmd && shift {
+                switch key {
+                case Key.s, Key.four:   // Win+Shift+S  e  ⇧⌘4 nativo
+                    swallowed[code] = true
+                    send(.screenshotToClipboard(fullScreen: false))
+                    return nil
+                case Key.three:         // ⇧⌘3 nativo
+                    swallowed[code] = true
+                    send(.screenshotToClipboard(fullScreen: true))
+                    return nil
+                default:
+                    break
+                }
             }
         }
 
@@ -268,10 +296,7 @@ final class RemapEngine: @unchecked Sendable {
         if event.getIntegerValueField(.eventSourceUserData) == Self.syntheticMarker {
             return Unmanaged.passUnretained(event)
         }
-        var code = Int(event.getIntegerValueField(.keyboardEventKeycode) & 0xFF)
-        if code == Int(Key.section) || code == Int(Key.grave) {
-            code = swapSectionKeyIfNeeded(event, SharedState.shared.snapshot)
-        }
+        let code = Int(event.getIntegerValueField(.keyboardEventKeycode) & 0xFF)
         if swallowed[code] {
             swallowed[code] = false
             return nil
@@ -284,22 +309,6 @@ final class RemapEngine: @unchecked Sendable {
     }
 
     // MARK: - Reescrita
-
-    /// Corrige teclados de PC em que a tecla à esquerda do 1 (' ") e a à esquerda do Z (\ |)
-    /// chegam trocadas. Vale em todos os apps (é uma correção física, não um atalho).
-    @inline(__always)
-    private func swapSectionKeyIfNeeded(_ event: CGEvent, _ state: RemapSnapshot) -> Int {
-        let code = Int(event.getIntegerValueField(.keyboardEventKeycode) & 0xFF)
-        guard state.enabled, state.swapSectionKeys else { return code }
-        let swapped: UInt16
-        switch UInt16(code) {
-        case Key.section: swapped = Key.grave
-        case Key.grave: swapped = Key.section
-        default: return code
-        }
-        event.setIntegerValueField(.keyboardEventKeycode, value: Int64(swapped))
-        return Int(swapped)
-    }
 
     private enum FnPad { case keep, set, clear }
 
