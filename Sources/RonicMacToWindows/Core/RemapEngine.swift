@@ -1,8 +1,8 @@
 import CoreGraphics
 import Foundation
 
-/// Ações que não cabem dentro do callback (UI, abrir apps, bloquear tela).
-/// O callback só as enfileira na main queue e volta imediatamente.
+/// Actions that don't belong inside the callback (UI, launching apps, locking the screen).
+/// The callback only enqueues them on the main queue and returns immediately.
 enum EngineAction {
     case switcherShow(reverse: Bool)
     case switcherStep(Int)
@@ -15,17 +15,16 @@ enum EngineAction {
     case taskManager
 }
 
-/// Interceptação de teclado em tempo real via `CGEventTap`.
+/// Real-time keyboard interception through a `CGEventTap`.
 ///
-/// * O tap roda numa thread própria (QoS userInteractive) com seu próprio CFRunLoop:
-///   se a thread principal estiver ocupada desenhando o menu ou o seletor de apps,
-///   a digitação não sofre atraso.
-/// * O callback reescreve o próprio evento (keyCode + flags) e o devolve. Sem criar eventos,
-///   sem I/O, sem logs, sem tocar em UI.
-/// * O tap fica no nível HID (`.cghidEventTap`), antes dos atalhos globais do sistema.
-///   Assim Ctrl+← vira ⌥← antes de o macOS interpretá-lo como "mudar de Space".
+/// * The tap runs on its own thread (QoS userInteractive) with its own CFRunLoop:
+///   if the main thread is busy drawing the menu or the app switcher, typing is never delayed.
+/// * The callback rewrites the event itself (keyCode + flags) and returns it. No new events,
+///   no I/O, no logging, no UI work.
+/// * The tap sits at the HID level (`.cghidEventTap`), ahead of the system-wide shortcuts.
+///   That is how Ctrl+← becomes ⌥← before macOS reads it as "switch Space".
 final class RemapEngine: @unchecked Sendable {
-    /// Marca os eventos que nós mesmos postamos, para o tap não reprocessá-los.
+    /// Tags the events we post ourselves so the tap doesn't process them again.
     static let syntheticMarker: Int64 = 0x524F_4E49_4321 // "RONIC!"
 
     private let dispatch: (EngineAction) -> Void
@@ -33,7 +32,7 @@ final class RemapEngine: @unchecked Sendable {
     private var runLoop: CFRunLoop?
     private var thread: Thread?
 
-    // ---- Estado acessado SOMENTE pela thread do tap ----
+    // ---- State touched ONLY by the tap thread ----
 
     private struct Remap {
         let keyCode: UInt16
@@ -41,14 +40,14 @@ final class RemapEngine: @unchecked Sendable {
         let char: UniChar?
     }
 
-    /// keyDown reescrito → o keyUp da mesma tecla física recebe a mesma reescrita,
-    /// mesmo que o modificador já tenha sido solto (evita tecla "presa" no app).
+    /// Rewritten keyDown → the keyUp of the same physical key gets the same rewrite,
+    /// even if the modifier was already released (prevents "stuck" keys in the app).
     private var remapped = [Remap?](repeating: nil, count: 256)
-    /// keyDown engolido → engole o keyUp correspondente.
+    /// Swallowed keyDown → swallow the matching keyUp too.
     private var swallowed = [Bool](repeating: false, count: 256)
-    /// Alt+Tab em andamento (Option ainda pressionado).
+    /// Alt+Tab in progress (Option still held).
     private var switcherActive = false
-    /// Tabela fixa Ctrl+<tecla> → ⌘+<tecla>.
+    /// Fixed table Ctrl+<key> → ⌘+<key>.
     private let ctrlToCommand: [Bool] = {
         var t = [Bool](repeating: false, count: 256)
         for k in [Key.c, Key.v, Key.x, Key.z, Key.a, Key.s, Key.f, Key.n, Key.t, Key.w, Key.p, Key.l,
@@ -64,9 +63,9 @@ final class RemapEngine: @unchecked Sendable {
 
     var isRunning: Bool { tap != nil }
 
-    // MARK: - Ciclo de vida (thread principal)
+    // MARK: - Lifecycle (main thread)
 
-    /// Cria o tap. Retorna `false` se o app ainda não tem permissão de Acessibilidade.
+    /// Creates the tap. Returns `false` while the app doesn't have Accessibility permission yet.
     func start() -> Bool {
         if tap != nil { return true }
 
@@ -106,7 +105,7 @@ final class RemapEngine: @unchecked Sendable {
         return true
     }
 
-    /// Pausar = desligar o tap: o sistema deixa de enviar eventos para o app (custo zero).
+    /// Pausing = disabling the tap: the system stops sending events to the app (zero cost).
     func setActive(_ active: Bool) {
         guard let tap else { return }
         CGEvent.tapEnable(tap: tap, enable: active)
@@ -122,7 +121,7 @@ final class RemapEngine: @unchecked Sendable {
         thread = nil
     }
 
-    // MARK: - Callback (thread do tap)
+    // MARK: - Callback (tap thread)
 
     @inline(__always)
     func handle(_ type: CGEventType, _ event: CGEvent) -> Unmanaged<CGEvent>? {
@@ -132,14 +131,14 @@ final class RemapEngine: @unchecked Sendable {
         case .keyUp:
             return handleKeyUp(event)
         case .flagsChanged:
-            // Soltar o Option encerra o Alt+Tab, como no Windows.
+            // Releasing Option ends Alt+Tab, like on Windows.
             if switcherActive, event.flags.rawValue & Mask.option == 0 {
                 switcherActive = false
                 send(.switcherCommit)
             }
             return Unmanaged.passUnretained(event)
         case .tapDisabledByTimeout, .tapDisabledByUserInput:
-            // O macOS desliga o tap se ele demorar demais; religamos na hora.
+            // macOS disables the tap if it takes too long; turn it back on right away.
             if switcherActive {
                 switcherActive = false
                 send(.switcherCancel)
@@ -170,7 +169,7 @@ final class RemapEngine: @unchecked Sendable {
         remapped[code] = nil
         swallowed[code] = false
 
-        // ---- Alt+Tab em andamento: o seletor consome as teclas ----
+        // ---- Alt+Tab in progress: the switcher consumes the keys ----
         if switcherActive {
             if opt {
                 swallowed[code] = true
@@ -184,14 +183,14 @@ final class RemapEngine: @unchecked Sendable {
                 }
                 return nil
             }
-            // Option já foi solto e perdemos o flagsChanged: confirma e segue normalmente.
+            // Option was released and we missed the flagsChanged: commit and carry on normally.
             switcherActive = false
             send(.switcherCommit)
         }
 
         guard state.enabled else { return pass }
 
-        // ---- Janelas e sistema (valem em todos os apps) ----
+        // ---- Windows & system (apply in every app) ----
         if state.groups.contains(.windows) {
             if opt && !cmd && !ctrl {
                 if key == Key.tab {
@@ -201,12 +200,12 @@ final class RemapEngine: @unchecked Sendable {
                     return nil
                 }
                 if key == Key.f4 && !shift {
-                    // Alt+F4 → ⌘Q (encerra o app ativo respeitando "salvar alterações?")
+                    // Alt+F4 → ⌘Q (quits the active app, which still asks "save changes?")
                     return rewrite(event, code, to: Key.q, mods: Mask.outCommand, fnPad: .clear, char: KeyChar.q)
                 }
             }
             if key == Key.f13 && !cmd && !ctrl && !opt && !state.groups.contains(.screenshots) {
-                // Prints → clipboard desligado: PrtSc abre a barra de captura (⇧⌘5).
+                // Screenshots → clipboard is off: PrtSc opens the capture toolbar (⇧⌘5).
                 swallowed[code] = true
                 send(.screenshot)
                 return nil
@@ -218,23 +217,23 @@ final class RemapEngine: @unchecked Sendable {
             }
         }
 
-        // ---- Prints direto para a área de transferência (todos os apps) ----
-        // Usa os atalhos nativos ⌃⇧⌘3 / ⌃⇧⌘4 do macOS ("copiar para a área de transferência"):
-        // nenhuma permissão extra de Gravação de Tela é necessária.
+        // ---- Screenshots straight to the clipboard (every app) ----
+        // Uses the native macOS shortcuts ⌃⇧⌘3 / ⌃⇧⌘4 ("copy to clipboard"):
+        // no extra Screen Recording permission is needed.
         if state.groups.contains(.screenshots) && !ctrl && !opt {
             if key == Key.f13 && !cmd {
-                // PrtSc → recorte de área, como o Win+Shift+S / Ferramenta de Captura do Windows 11
+                // PrtSc → area snip, like Win+Shift+S / the Windows 11 Snipping Tool
                 swallowed[code] = true
-                send(.screenshotToClipboard(fullScreen: shift))   // Shift+PrtSc = tela inteira
+                send(.screenshotToClipboard(fullScreen: shift))   // Shift+PrtSc = full screen
                 return nil
             }
             if cmd && shift {
                 switch key {
-                case Key.s, Key.four:   // Win+Shift+S  e  ⇧⌘4 nativo
+                case Key.s, Key.four:   // Win+Shift+S  and native ⇧⌘4
                     swallowed[code] = true
                     send(.screenshotToClipboard(fullScreen: false))
                     return nil
-                case Key.three:         // ⇧⌘3 nativo
+                case Key.three:         // native ⇧⌘3
                     swallowed[code] = true
                     send(.screenshotToClipboard(fullScreen: true))
                     return nil
@@ -244,23 +243,23 @@ final class RemapEngine: @unchecked Sendable {
             }
         }
 
-        // ---- Tecla Win (= ⌘) ----
+        // ---- Win key (= ⌘) ----
         if state.groups.contains(.winKey) && cmd && !ctrl && !opt && !shift {
             if key == Key.l { swallowed[code] = true; send(.lockScreen); return nil }
             if key == Key.d { swallowed[code] = true; send(.showDesktop); return nil }
         }
 
-        // Terminais, VMs etc.: o Control original segue intacto.
+        // Terminals, VMs etc.: the original Control key is left untouched.
         if state.frontmostExcluded { return pass }
 
-        // ---- Navegação de texto ----
+        // ---- Text navigation ----
         if state.groups.contains(.textNavigation) && !cmd && !opt {
             switch key {
             case Key.home:
                 return ctrl
                     ? rewrite(event, code, to: Key.up, mods: Mask.outCommand, fnPad: .set, char: KeyChar.upArrow)
-                    // ^A = moveToBeginningOfParagraph (Shift preservado → seleciona).
-                    // Diferente de ⌘←, não vira "Voltar" no navegador fora de campos de texto.
+                    // ^A = moveToBeginningOfParagraph (Shift is kept → selects).
+                    // Unlike ⌘←, it doesn't turn into browser "Back" outside text fields.
                     : rewrite(event, code, to: Key.a, mods: Mask.outControl, fnPad: .clear, char: KeyChar.ctrlA)
             case Key.end:
                 return ctrl
@@ -273,14 +272,14 @@ final class RemapEngine: @unchecked Sendable {
             }
         }
 
-        // ---- Edição: Ctrl → ⌘ ----
+        // ---- Editing: Ctrl → ⌘ ----
         if state.groups.contains(.editing) && ctrl && !cmd && !opt {
             if key == Key.v && shift {
-                // Ctrl+Shift+V → ⌥⇧⌘V (colar sem formatação)
+                // Ctrl+Shift+V → ⌥⇧⌘V (paste without formatting)
                 return rewrite(event, code, to: key, mods: Mask.outCommand | Mask.outOption, fnPad: .keep)
             }
             if key == Key.y {
-                // Ctrl+Y → ⇧⌘Z (refazer)
+                // Ctrl+Y → ⇧⌘Z (redo)
                 return rewrite(event, code, to: Key.z, mods: Mask.outCommand, addShift: true, fnPad: .keep, char: KeyChar.z)
             }
             if ctrlToCommand[code] {
@@ -308,7 +307,7 @@ final class RemapEngine: @unchecked Sendable {
         return Unmanaged.passUnretained(event)
     }
 
-    // MARK: - Reescrita
+    // MARK: - Rewriting
 
     private enum FnPad { case keep, set, clear }
 
@@ -348,8 +347,8 @@ final class RemapEngine: @unchecked Sendable {
     }
 }
 
-/// Função C exigida pelo `CGEvent.tapCreate`. `refcon` é o próprio engine (não retido:
-/// ele vive enquanto o app vive).
+/// C function required by `CGEvent.tapCreate`. `refcon` is the engine itself (unretained:
+/// it lives as long as the app does).
 private func ronicEventTapCallback(
     proxy: CGEventTapProxy,
     type: CGEventType,

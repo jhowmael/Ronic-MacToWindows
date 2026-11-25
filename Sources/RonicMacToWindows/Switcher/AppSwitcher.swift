@@ -1,11 +1,11 @@
 import AppKit
 
-/// Alt+Tab estilo Windows.
+/// Windows-style Alt+Tab.
 ///
-/// * Nada é carregado até o atalho ser acionado: a lista de apps e os ícones são montados
-///   na hora e descartados ao soltar o Option.
-/// * Um Alt+Tab rápido (aperta e solta) troca direto para o app anterior, sem nem desenhar
-///   o painel. O painel só aparece se o Option ficar pressionado por mais de 120 ms.
+/// * Nothing is loaded until the shortcut fires: the app list and icons are built on the spot
+///   and thrown away when Option is released.
+/// * A quick Alt+Tab (press and release) switches straight to the previous app without even
+///   drawing the panel. The panel only appears if Option is held for more than 120 ms.
 @MainActor
 final class AppSwitcher {
     private unowned let tracker: FrontmostAppTracker
@@ -58,7 +58,7 @@ final class AppSwitcher {
         teardown()
     }
 
-    // MARK: - Privado
+    // MARK: - Private
 
     private func present() {
         guard isActive, panel == nil, !apps.isEmpty else { return }
@@ -86,8 +86,8 @@ final class AppSwitcher {
         if app.isHidden { app.unhide() }
         app.activate(options: [.activateAllWindows])
 
-        // Plano B: se o macOS recusar a ativação (ativação cooperativa do macOS 14+),
-        // pede ao LaunchServices, como um clique no Dock (também restaura janelas minimizadas).
+        // Fallback: if macOS refuses the activation (cooperative activation, macOS 14+),
+        // ask LaunchServices instead, like a Dock click (also restores minimized windows).
         let pid = app.processIdentifier
         let url = app.bundleURL
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {

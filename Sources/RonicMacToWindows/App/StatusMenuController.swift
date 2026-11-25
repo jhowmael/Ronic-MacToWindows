@@ -1,8 +1,8 @@
 import AppKit
 import UniformTypeIdentifiers
 
-/// Ícone e menu na barra superior. O menu é reconstruído só quando é aberto
-/// (menuNeedsUpdate); fora isso, nenhum trabalho de UI acontece.
+/// Menu bar icon and menu. The menu is rebuilt only when it opens (menuNeedsUpdate);
+/// otherwise no UI work happens at all.
 @MainActor
 final class StatusMenuController: NSObject, NSMenuDelegate {
     private unowned let controller: AppController
@@ -53,7 +53,7 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
         menu.addItem(header)
         menu.addItem(.separator())
 
-        // Ativar / Pausar
+        // Enable / Pause
         let toggle = item(controller.isEnabled ? "Pausar remapeamento" : "Ativar remapeamento",
                           #selector(toggleEnabled), key: "p",
                           symbol: controller.isEnabled ? "pause.fill" : "play.fill")
@@ -61,7 +61,7 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
         menu.addItem(toggle)
         menu.addItem(.separator())
 
-        // Permissão de Acessibilidade
+        // Accessibility permission
         if controller.isTrusted {
             let ok = NSMenuItem(title: "Acessibilidade: autorizada", action: nil, keyEquivalent: "")
             ok.image = symbol("checkmark.circle.fill")
@@ -83,13 +83,13 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
         }
         menu.addItem(.separator())
 
-        // Grupos de atalhos
+        // Shortcut groups
         let groups = NSMenuItem(title: "Atalhos", action: nil, keyEquivalent: "")
         groups.image = symbol("keyboard")
         groups.submenu = buildGroupsMenu()
         menu.addItem(groups)
 
-        // Apps ignorados
+        // Ignored apps
         let ignored = NSMenuItem(title: "Apps ignorados", action: nil, keyEquivalent: "")
         ignored.image = symbol("nosign")
         ignored.submenu = buildExclusionsMenu()
@@ -157,7 +157,7 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
         return sub
     }
 
-    // MARK: - Ações
+    // MARK: - Actions
 
     @objc private func toggleEnabled() { controller.setEnabled(!controller.isEnabled) }
 
@@ -232,28 +232,28 @@ final class StatusMenuController: NSObject, NSMenuDelegate {
     }
 }
 
-/// Versão monocromática do logo para a barra de menus: "R" + barra de conversão + rastros.
-/// Desenhada uma única vez, como imagem template (se adapta ao tema claro/escuro).
+/// Monochrome version of the logo for the menu bar: "R" + conversion bar + motion streaks.
+/// Drawn once, as a template image (adapts to light/dark mode).
 enum StatusIcon {
     static let image: NSImage = {
         let size = NSSize(width: 22, height: 18)
         let image = NSImage(size: size, flipped: false) { rect in
             NSColor.black.setFill()
 
-            // Rastros de movimento à esquerda (algo passando de lado).
+            // Motion streaks on the left (something passing sideways).
             for (y, w, a) in [(5.0, 4.0, 0.55), (9.0, 6.0, 0.9), (13.0, 3.0, 0.4)] as [(CGFloat, CGFloat, CGFloat)] {
                 NSColor.black.withAlphaComponent(a).setFill()
                 NSBezierPath(roundedRect: NSRect(x: 0, y: y - 0.75, width: w, height: 1.5), xRadius: 0.75, yRadius: 0.75).fill()
             }
 
-            // Letra R.
+            // Letter R.
             let font = NSFont.systemFont(ofSize: 15, weight: .black)
             let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.black]
             let r = NSAttributedString(string: "R", attributes: attrs)
             let rSize = r.size()
             r.draw(at: NSPoint(x: 7, y: (rect.height - rSize.height) / 2))
 
-            // Barra vertical de conversão.
+            // Vertical conversion bar.
             NSColor.black.setFill()
             NSBezierPath(roundedRect: NSRect(x: 7 + rSize.width + 1.5, y: 1.5, width: 1.6, height: rect.height - 3),
                          xRadius: 0.8, yRadius: 0.8).fill()

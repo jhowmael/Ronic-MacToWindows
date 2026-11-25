@@ -5,7 +5,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var controller: AppController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Só uma instância: duas teriam dois event taps disputando as mesmas teclas.
+        // Single instance: two would mean two event taps fighting over the same keys.
         if let id = Bundle.main.bundleIdentifier {
             let me = NSRunningApplication.current
             let others = NSRunningApplication.runningApplications(withBundleIdentifier: id).filter { $0 != me }
@@ -15,7 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        // Intencionalmente NÃO há SMAppService / Login Items: o app só roda quando aberto à mão.
+        // Intentionally NO SMAppService / Login Items: the app only runs when opened by hand.
         let controller = AppController()
         self.controller = controller
         controller.start()

@@ -5,226 +5,228 @@
 <h1 align="center">Ronic MacToWindows</h1>
 
 <p align="center">
-  <b>Use os atalhos do Windows no macOS, com a mesma memória muscular.</b><br>
-  Ctrl+C/V, Home/End, Ctrl+←/→, Alt+Tab, Alt+F4, Win+L… · nativo em Swift · latência imperceptível · só na barra de menus
+  <b>Use Windows keyboard shortcuts on macOS, with the same muscle memory.</b><br>
+  Ctrl+C/V, Home/End, Ctrl+←/→, Alt+Tab, Alt+F4, Win+L, Print Screen… · native Swift · imperceptible latency · menu bar only
 </p>
 
 <p align="center">
   <a href="https://github.com/jhowmael/Ronic-MacToWindows/releases/latest/download/RonicMacToWindows-macOS.zip">
-    <img src="https://img.shields.io/badge/Download-macOS-0078D4?style=for-the-badge&logo=apple&logoColor=white" alt="Download para macOS">
+    <img src="https://img.shields.io/badge/Download-macOS-0078D4?style=for-the-badge&logo=apple&logoColor=white" alt="Download for macOS">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/jhowmael/Ronic-MacToWindows/releases">Todas as versões</a> ·
-  <a href="#instalação">Instalação</a> ·
-  <a href="#atalhos">Atalhos</a> ·
-  <a href="#compilar-a-partir-do-código">Compilar</a>
+  <a href="https://github.com/jhowmael/Ronic-MacToWindows/releases">All releases</a> ·
+  <a href="#installation">Installation</a> ·
+  <a href="#shortcuts">Shortcuts</a> ·
+  <a href="#building-from-source">Build</a>
 </p>
 
 ---
 
 ## Download
 
-| Sistema | Arquivo | Requisitos |
+| System | File | Requirements |
 |---|---|---|
-| **macOS** (Apple Silicon e Intel) | [`RonicMacToWindows-macOS.zip`](https://github.com/jhowmael/Ronic-MacToWindows/releases/latest/download/RonicMacToWindows-macOS.zip) | macOS 14 Sonoma ou mais recente |
+| **macOS** (Apple Silicon and Intel) | [`RonicMacToWindows-macOS.zip`](https://github.com/jhowmael/Ronic-MacToWindows/releases/latest/download/RonicMacToWindows-macOS.zip) | macOS 14 Sonoma or later |
 
-* **Fica só na barra superior.** Não aparece no Dock nem no ⌘Tab.
-* **Não inicia com o sistema.** Ele só roda quando você abre o app. Depois de ligar ou reiniciar o Mac, abra-o de novo quando quiser.
-* **Leve.** Usa cerca de 0,1 µs por tecla e nenhuma CPU parado, sem timers nem polling.
+* **Menu bar only.** It doesn't show up in the Dock or in ⌘Tab.
+* **Doesn't start at login.** It only runs when you open it. After turning on or restarting your Mac, open it again whenever you want.
+* **Lightweight.** About 0.1 µs per keystroke and no CPU at all when idle: no timers, no polling.
 
-## Instalação
+> The app's menus are currently in Portuguese. Below, each menu item is given in English followed by its label in the app, in italics.
 
-1. Baixe e descompacte `RonicMacToWindows-macOS.zip`. Arraste **RonicMacToWindows.app** para **Aplicativos**.
-2. Abra o app. Na primeira vez, o macOS pode bloquear: vá em **Ajustes do Sistema › Privacidade e Segurança** e clique em **Abrir Mesmo Assim**. Se preferir o Terminal: `xattr -dr com.apple.quarantine /Applications/RonicMacToWindows.app`.
-3. Autorize a **Acessibilidade**: em **Ajustes do Sistema › Privacidade e Segurança › Acessibilidade**, ative **RonicMacToWindows**. O próprio app abre esse painel. A captura começa sozinha assim que você autoriza, sem precisar reabrir o app.
-4. Pronto. O ícone **R** aparece na barra superior, no canto direito.
+## Installation
 
-> **Ativei a Acessibilidade e o app continua dizendo "não autorizada"?** Isso acontece depois de atualizar o app. O macOS amarra a permissão à assinatura do binário, então a chave nos Ajustes continua ligada, mas pertence à versão anterior. Ligar e desligar a chave não resolve.
-> * O app detecta isso ao abrir: remove a entrada antiga e pede a permissão de novo. Basta ligar a chave outra vez.
-> * Se ainda não funcionar, abra o menu do app e clique em **Já ativei e não funciona: redefinir permissão**. Se a permissão aparecer como autorizada mas os atalhos não voltarem, use **Reabrir o app**.
-> * Pelo Terminal: `tccutil reset Accessibility io.github.jhowmael.ronicmactowindows` e abra o app.
+1. Download and unzip `RonicMacToWindows-macOS.zip`. Drag **RonicMacToWindows.app** into **Applications**.
+2. Open the app. The first time, macOS may block it: go to **System Settings › Privacy & Security** and click **Open Anyway**. From the Terminal instead: `xattr -dr com.apple.quarantine /Applications/RonicMacToWindows.app`.
+3. Grant **Accessibility**: in **System Settings › Privacy & Security › Accessibility**, turn on **RonicMacToWindows**. The app opens that pane for you. Remapping starts as soon as you grant it, with no need to reopen the app.
+4. Done. The **R** icon appears on the right side of the menu bar.
 
-## Atalhos
+> **Enabled Accessibility but the app still says "not authorized"?** This happens after updating the app. macOS ties the permission to the binary's signature, so the toggle in Settings stays on but belongs to the previous version. Turning it off and on doesn't help.
+> * The app detects this at launch: it removes the old entry and asks for the permission again. Just turn the toggle on once more.
+> * If it still doesn't work, open the app's menu and click **Reset permission** (*Já ativei e não funciona: redefinir permissão*). If the permission shows as granted but shortcuts don't come back, use **Relaunch the app** (*Reabrir o app*).
+> * From the Terminal: `tccutil reset Accessibility io.github.jhowmael.ronicmactowindows`, then open the app.
 
-Nesta tabela, **Alt = Option (⌥)** e **Win = Command (⌘)**. É assim que o macOS lê um teclado de PC.
+## Shortcuts
 
-### Edição (Ctrl → ⌘)
+In these tables, **Alt = Option (⌥)** and **Win = Command (⌘)**. That's how macOS reads a PC keyboard.
 
-| Windows | Vira no Mac | Ação |
+### Editing (Ctrl → ⌘)
+
+| Windows | Becomes on Mac | Action |
 |---|---|---|
-| Ctrl+C / Ctrl+X / Ctrl+V | ⌘C / ⌘X / ⌘V | Copiar / recortar / colar |
-| Ctrl+Shift+V | ⌥⇧⌘V | Colar sem formatação (quando o app suporta) |
-| Ctrl+Z / **Ctrl+Y** | ⌘Z / **⇧⌘Z** | Desfazer / refazer |
-| Ctrl+A / Ctrl+S / Ctrl+F | ⌘A / ⌘S / ⌘F | Selecionar tudo / salvar / buscar |
-| Ctrl+N / Ctrl+T / Ctrl+W | ⌘N / ⌘T / ⌘W | Nova janela / nova aba / fechar aba |
-| Ctrl+P / Ctrl+L | ⌘P / ⌘L | Imprimir / barra de endereço |
-| Ctrl+O / R / B / I / U / K | ⌘O / R / B / I / U / K | Abrir, recarregar, negrito, itálico, sublinhado, link |
+| Ctrl+C / Ctrl+X / Ctrl+V | ⌘C / ⌘X / ⌘V | Copy / cut / paste |
+| Ctrl+Shift+V | ⌥⇧⌘V | Paste without formatting (where the app supports it) |
+| Ctrl+Z / **Ctrl+Y** | ⌘Z / **⇧⌘Z** | Undo / redo |
+| Ctrl+A / Ctrl+S / Ctrl+F | ⌘A / ⌘S / ⌘F | Select all / save / find |
+| Ctrl+N / Ctrl+T / Ctrl+W | ⌘N / ⌘T / ⌘W | New window / new tab / close tab |
+| Ctrl+P / Ctrl+L | ⌘P / ⌘L | Print / address bar |
+| Ctrl+O / R / B / I / U / K | ⌘O / R / B / I / U / K | Open, reload, bold, italic, underline, link |
 | Ctrl+= / Ctrl+- / Ctrl+0 | ⌘= / ⌘- / ⌘0 | Zoom |
-| Ctrl+Shift+T, Ctrl+Shift+N… | ⇧⌘T, ⇧⌘N… | O Shift é preservado |
+| Ctrl+Shift+T, Ctrl+Shift+N… | ⇧⌘T, ⇧⌘N… | Shift is preserved |
 
-### Navegação de texto
+### Text navigation
 
-| Windows | Ação |
+| Windows | Action |
 |---|---|
-| Home / End | Início / fim da linha (com **Shift**, seleciona) |
-| Ctrl+Home / Ctrl+End | Início / fim do texto |
-| Ctrl+← / Ctrl+→ | Pular palavra (com **Shift**, seleciona) |
-| Ctrl+Backspace / Ctrl+Delete | Apagar palavra à esquerda / à direita |
+| Home / End | Start / end of line (with **Shift**, selects) |
+| Ctrl+Home / Ctrl+End | Start / end of the document |
+| Ctrl+← / Ctrl+→ | Jump by word (with **Shift**, selects) |
+| Ctrl+Backspace / Ctrl+Delete | Delete the word to the left / right |
 
-> Home/End usam ⌃A/⌃E (início/fim do parágrafo no Cocoa) em vez de ⌘←/⌘→. Assim, apertar Home numa página web não vira **Voltar** no navegador.
+> Home/End use ⌃A/⌃E (start/end of paragraph in Cocoa) instead of ⌘←/⌘→. That way, pressing Home on a web page doesn't trigger the browser's **Back**.
 
-### Janelas e sistema
+### Windows & system
 
-| Windows | Ação |
+| Windows | Action |
 |---|---|
-| **Alt+Tab** | Seletor de apps estilo Windows. Segure Alt e aperte Tab (Shift+Tab ou ←/→ para voltar). Solte Alt para trocar, ou aperte Esc para cancelar. Um toque rápido troca direto para o app anterior. |
-| Alt+F4 | Encerra o app ativo (⌘Q, então o app ainda pergunta se quer salvar) |
-| **Win+L** | Bloqueia a tela |
-| **Win+D** | Mostra a área de trabalho (aperte de novo para voltar) |
-| Ctrl+Shift+Esc | Abre o Monitor de Atividade (o "Gerenciador de Tarefas") |
+| **Alt+Tab** | Windows-style app switcher. Hold Alt and press Tab (Shift+Tab or ←/→ to go back). Release Alt to switch, or press Esc to cancel. A quick tap switches straight to the previous app. |
+| Alt+F4 | Quits the active app (⌘Q, so the app still asks whether to save) |
+| **Win+L** | Locks the screen |
+| **Win+D** | Shows the desktop (press again to restore) |
+| Ctrl+Shift+Esc | Opens Activity Monitor (the Mac's "Task Manager") |
 
-**Não é afetado:** a digitação de acentos e caracteres especiais (´ ~ ^ ` ç, Option+letra) e os seus atalhos ⌘ nativos. O ⌘C continua funcionando. As exceções são ⌘L e ⌘D, que viram Win+L e Win+D. Para usá-los como no Mac, desligue o grupo **Tecla Win** no menu.
+**Not affected:** typing accents and special characters (´ ~ ^ ` ç, Option+letter) and your native ⌘ shortcuts, so ⌘C keeps working. The exceptions are ⌘L and ⌘D, which act as Win+L and Win+D. To use them the Mac way, turn off the **Win key** group in the menu.
 
-### Prints direto na área de transferência
+### Screenshots straight to the clipboard
 
-Como no Windows, o print vai **direto para a área de transferência**. É só colar com Ctrl+V onde quiser.
+Like on Windows, screenshots go **straight to the clipboard**. Just paste with Ctrl+V wherever you want.
 
-| Tecla | Captura |
+| Key | Capture |
 |---|---|
-| **Print Screen** | Recorte de área, como a Ferramenta de Captura do Windows 11. Aperte Espaço para capturar uma janela |
-| **Shift+Print Screen** | Tela inteira |
-| **Win+Shift+S** | Recorte de área, como no Windows |
-| **⇧⌘4** / **⇧⌘3** (atalhos do Mac) | Também vão para a área de transferência, em vez de virar arquivo na Mesa |
+| **Print Screen** | Area snip, like the Windows 11 Snipping Tool. Press Space to capture a window |
+| **Shift+Print Screen** | Full screen |
+| **Win+Shift+S** | Area snip, like on Windows |
+| **⇧⌘4** / **⇧⌘3** (Mac shortcuts) | Also go to the clipboard instead of becoming a file on the Desktop |
 
-* Liga e desliga em **menu › Atalhos › Prints → área de transferência**. Desligado, o Print Screen abre a barra de captura (⇧⌘5) e os atalhos do Mac voltam a salvar arquivo.
-* Funciona em todos os apps, inclusive nos ignorados. Quem captura é o próprio macOS (⌃⇧⌘3/4), então o app **não precisa** da permissão de Gravação de Tela.
-* ⇧⌘5 (barra de captura) não é alterado. Nele, o destino é escolhido em **Opções**.
-* Win+Shift+S usa o ⇧⌘S físico. O "Salvar como" pelo jeito Windows (**Ctrl+Shift+S**) continua funcionando.
+* Turn it on or off in **menu › Shortcuts › Screenshots → clipboard** (*Atalhos › Prints → área de transferência*). When it's off, Print Screen opens the capture toolbar (⇧⌘5) and the Mac shortcuts save files again.
+* Works in every app, including ignored ones. macOS itself takes the capture (⌃⇧⌘3/4), so the app **does not need** Screen Recording permission.
+* ⇧⌘5 (the capture toolbar) is left alone. There, you choose the destination under **Options**.
+* Win+Shift+S uses the physical ⇧⌘S key. Windows-style "Save As" (**Ctrl+Shift+S**) keeps working.
 
-## Menu na barra superior
+## Menu bar
 
-| Item | O que faz |
+| Item (label in the app) | What it does |
 |---|---|
-| **Pausar / Ativar remapeamento** | Desliga a captura de teclado por completo (custo zero) e liga de novo. O ícone fica apagado quando pausado. |
-| **Acessibilidade** | Mostra se a permissão foi concedida, abre os Ajustes e tem **Redefinir permissão** para quando a chave fica ligada mas não vale (depois de atualizar). |
-| **Atalhos** | Liga e desliga cada grupo: Edição, Navegação de texto, Janelas, Tecla Win, Prints → área de transferência. |
-| **Apps ignorados** | **Ignorar "App atual"** com um clique, **Adicionar app…** escolhendo um .app, clique num item para remover, **Restaurar padrões**. |
-| **Sair** | Encerra o app (⌘Q com o menu aberto). |
+| **Pause / Enable remapping** (*Pausar / Ativar remapeamento*) | Fully turns keyboard capture off (zero cost) and back on. The icon is dimmed while paused. |
+| **Accessibility** (*Acessibilidade*) | Shows whether the permission was granted, opens Settings, and offers **Reset permission** for when the toggle is on but not applied (after an update). |
+| **Shortcuts** (*Atalhos*) | Turns each group on or off: Editing, Text navigation, Windows, Win key, Screenshots → clipboard. |
+| **Ignored apps** (*Apps ignorados*) | **Ignore "current app"** with one click, **Add app…** to pick an .app, click an entry to remove it, **Restore defaults**. |
+| **Quit** (*Sair*) | Quits the app (⌘Q while the menu is open). |
 
-### Apps ignorados
+### Ignored apps
 
-Nos apps ignorados, o **Control original é preservado**, porque terminais precisam de Ctrl+C para interromper processos. Nesses apps, Edição e Navegação de texto ficam desligadas. Alt+Tab, Alt+F4, Win+L etc. continuam valendo.
+In ignored apps, **the original Control key is preserved**, because terminals need Ctrl+C to interrupt processes. In those apps, Editing and Text navigation are off. Alt+Tab, Alt+F4, Win+L, screenshots, etc. keep working.
 
-Já vêm ignorados: Terminal, iTerm2, Warp, Ghostty, kitty, Alacritty, WezTerm, Windows App (Área de Trabalho Remota), Parallels, VMware Fusion e UTM.
+Ignored by default: Terminal, iTerm2, Warp, Ghostty, kitty, Alacritty, WezTerm, Windows App (Remote Desktop), Parallels, VMware Fusion and UTM.
 
-## Dicas
+## Tips
 
-* **Teclado do Mac na posição do PC.** No teclado do Mac, a ordem perto da barra de espaço é Control, Option, Command. No PC, é Ctrl, Win, Alt. Se quiser o **Alt colado na barra de espaço**, como no Windows, troque Option e Command em **Ajustes do Sistema › Teclado › Atalhos de Teclado › Teclas Modificadoras**.
-* **Alt+F4 em teclados de Mac.** As teclas F1–F12 do Mac são de mídia por padrão. Use **fn+Alt+F4** ou ative "Usar F1, F2 etc. como teclas de função padrão" em **Ajustes › Teclado**.
-* **Print Screen** em teclados de PC chega ao Mac como **F13**, e é essa tecla que o app escuta.
-* **Ctrl+←/→** no macOS normalmente troca de Space (mesa). O app intercepta o atalho antes, então ele passa a pular palavras. Em apps ignorados, o comportamento do Mac volta.
+* **Mac keyboard in the PC layout.** On a Mac keyboard, the keys next to the space bar are Control, Option, Command. On a PC they are Ctrl, Win, Alt. If you want **Alt right next to the space bar**, like on Windows, swap Option and Command in **System Settings › Keyboard › Keyboard Shortcuts › Modifier Keys**.
+* **Alt+F4 on Mac keyboards.** The Mac's F1–F12 keys are media keys by default. Use **fn+Alt+F4**, or turn on "Use F1, F2, etc. keys as standard function keys" in **Settings › Keyboard**.
+* **Print Screen** on PC keyboards reaches the Mac as **F13**, and that's the key the app listens to.
+* **Ctrl+←/→** normally switches Spaces on macOS. The app intercepts it first, so it jumps by word instead. In ignored apps, the Mac behavior comes back.
 
 ---
 
-## Como funciona
+## How it works
 
 ```
- teclado ──▶ CGEventTap (nível HID, thread própria) ──▶ macOS/atalhos globais ──▶ app ativo
-                 │  lê 1 snapshot (lock de ~20 ns): ativo? app ignorado? grupos?
-                 │  reescreve keyCode + flags do PRÓPRIO evento e devolve (sem criar eventos)
-                 └─ Alt+Tab, Win+L, Win+D, PrtSc: só enfileira a ação na main thread
+ keyboard ──▶ CGEventTap (HID level, own thread) ──▶ macOS / global shortcuts ──▶ active app
+                 │  reads 1 snapshot (~20 ns lock): enabled? ignored app? groups?
+                 │  rewrites keyCode + flags of the SAME event and returns it (no new events)
+                 └─ Alt+Tab, Win+L, Win+D, screenshots: only enqueues the action on the main thread
 ```
 
-* **Swift nativo + Quartz.** Sem Electron, sem WebView. O binário tem cerca de 1,5 MB.
-* **O callback faz só comparações de inteiros:** keyCode e flags. Não faz I/O, não grava log, não aloca memória nem mexe em UI. Custa cerca de 0,12 µs por tecla, medido.
-* **Thread dedicada** (QoS *userInteractive*) com o próprio CFRunLoop. Se a interface estiver ocupada, a digitação não sofre atraso.
-* **Tap no nível HID:** a reescrita acontece antes dos atalhos globais do macOS. É por isso que Ctrl+← vira ⌥← em vez de trocar de Space.
-* **O keyUp segue o keyDown:** se você soltar o Ctrl antes da letra, a tecla não fica "presa" no app.
-* **Reativação automática:** se o macOS desligar o tap por timeout, ele é religado na hora.
-* **Cache do app ativo:** o app guarda o bundle ID atualizado por notificação do NSWorkspace. Não há polling.
-* **Alt+Tab carregado sob demanda:** a lista de apps e os ícones são montados só quando você aperta Alt+Tab e descartados ao soltar.
+* **Native Swift + Quartz.** No Electron, no WebView. The binary is about 1.5 MB.
+* **The callback only compares integers:** keyCode and flags. No I/O, no logging, no allocation, no UI work. Measured at about 0.1 µs per keystroke.
+* **Dedicated thread** (QoS *userInteractive*) with its own CFRunLoop. If the UI is busy, typing is never delayed.
+* **HID-level tap:** the rewrite happens before macOS's global shortcuts. That's why Ctrl+← becomes ⌥← instead of switching Spaces.
+* **keyUp follows keyDown:** if you release Ctrl before the letter, the key never gets "stuck" in the app.
+* **Automatic re-enable:** if macOS disables the tap on a timeout, it is turned back on immediately.
+* **Frontmost app cache:** the bundle ID is kept up to date by NSWorkspace notifications. No polling.
+* **On-demand Alt+Tab:** the app list and icons are built only when you press Alt+Tab and thrown away when you release it.
 
-## Estrutura do repositório
+## Repository layout
 
 ```
 .
 ├── Package.swift                         Swift Package (macOS 14+)
 ├── Resources/
-│   ├── Info.plist                        LSUIElement = true (sem Dock), bundle id, versão
-│   └── AppIcon.icns                      gerado por branding/make-icons.sh
+│   ├── Info.plist                        LSUIElement = true (no Dock icon), bundle id, version
+│   └── AppIcon.icns                      generated by branding/make-icons.sh
 ├── Sources/RonicMacToWindows/
-│   ├── main.swift                        ponto de entrada (.accessory)
+│   ├── main.swift                        entry point (.accessory)
 │   ├── App/
-│   │   ├── AppDelegate.swift             instância única; sem Login Items
-│   │   ├── AppController.swift           liga as peças; permissão; estado do tap
-│   │   └── StatusMenuController.swift    ícone + menu da barra superior
+│   │   ├── AppDelegate.swift             single instance; no Login Items
+│   │   ├── AppController.swift           wires everything; permission; tap state
+│   │   └── StatusMenuController.swift    menu bar icon + menu
 │   ├── Core/
-│   │   ├── RemapEngine.swift             CGEventTap + regras de remapeamento (caminho quente)
-│   │   ├── KeyCodes.swift                keyCodes e máscaras de modificadores
-│   │   ├── SharedState.swift             snapshot thread-safe lido pelo tap
-│   │   └── Settings.swift                preferências (grupos, apps ignorados)
+│   │   ├── RemapEngine.swift             CGEventTap + remapping rules (hot path)
+│   │   ├── KeyCodes.swift                key codes and modifier masks
+│   │   ├── SharedState.swift             thread-safe snapshot read by the tap
+│   │   └── Settings.swift                preferences (groups, ignored apps)
 │   ├── Services/
-│   │   ├── FrontmostAppTracker.swift     app ativo + ordem de uso (MRU)
-│   │   ├── AccessibilityPermission.swift status/pedido da permissão
-│   │   └── SystemActions.swift           bloquear tela, mostrar mesa, captura, Monitor de Atividade
+│   │   ├── FrontmostAppTracker.swift     frontmost app + most-recently-used order
+│   │   ├── AccessibilityPermission.swift permission status, prompt and reset
+│   │   └── SystemActions.swift           lock screen, show desktop, screenshots, Activity Monitor
 │   └── Switcher/
-│       ├── AppSwitcher.swift             lógica do Alt+Tab
-│       └── SwitcherPanel.swift           painel flutuante com os ícones
-├── branding/                             logo gerado por código + script de ícones
+│       ├── AppSwitcher.swift             Alt+Tab logic
+│       └── SwitcherPanel.swift           floating icon panel
+├── branding/                             code-generated logo + icon script
 ├── scripts/
-│   ├── package-macos.sh                  gera o .app e o .zip
-│   └── dev-signing.sh                    certificado local estável (permissão sobrevive a recompilar)
-└── .github/workflows/release.yml         publica o download ao criar uma tag
+│   ├── package-macos.sh                  builds the .app and the .zip
+│   └── dev-signing.sh                    stable local certificate (permission survives rebuilds)
+└── .github/workflows/release.yml         publishes the download when a tag is pushed
 ```
 
-## Compilar a partir do código
+## Building from source
 
-Pré-requisito: **Xcode ou Command Line Tools** (Swift 5.9+), em macOS 14+.
+Requirement: **Xcode or Command Line Tools** (Swift 5.9+), on macOS 14+.
 
 ```bash
 git clone https://github.com/jhowmael/Ronic-MacToWindows.git
 cd Ronic-MacToWindows
 
 make app       # → dist/RonicMacToWindows.app + dist/RonicMacToWindows-macOS.zip
-make install   # gera e copia para /Applications
-make icons     # regenera o logo e o AppIcon.icns
+make install   # builds and copies it to /Applications
+make icons     # regenerates the logo and AppIcon.icns
 ```
 
-### Testar
+### Testing
 
-1. `make install`, depois abra **RonicMacToWindows** em Aplicativos (ou rode `open /Applications/RonicMacToWindows.app`).
-2. Autorize a Acessibilidade. O ícone da barra deixa de mostrar o ⚠️.
-3. No **TextEdit** ou nas **Notas**: digite um texto e teste Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+Z, Ctrl+Y, Home/End, Shift+Home, Ctrl+←/→ e Ctrl+Backspace.
-4. Digite acentos (á, ã, ç, ê) e confira que nada mudou.
-5. Teste Alt+Tab com 3 ou mais apps abertos, Win+D duas vezes e Ctrl+Shift+Esc.
-6. Aperte **Win+Shift+S** (ou Print Screen), recorte uma área e cole com Ctrl+V no TextEdit.
-7. No **Terminal**, rode `sleep 100` e aperte **Ctrl+C**. O processo deve ser interrompido, porque o Terminal é ignorado por padrão.
-8. Pelo menu, teste **Pausar**, desligar um grupo, **Ignorar "app atual"** e **Sair**.
+1. Run `make install`, then open **RonicMacToWindows** from Applications (or run `open /Applications/RonicMacToWindows.app`).
+2. Grant Accessibility. The menu bar icon stops showing the ⚠️.
+3. In **TextEdit** or **Notes**, type some text and try Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+Z, Ctrl+Y, Home/End, Shift+Home, Ctrl+←/→ and Ctrl+Backspace.
+4. Type accented characters (á, ã, ç, ê) and check that nothing changed.
+5. Try Alt+Tab with 3 or more apps open, Win+D twice, and Ctrl+Shift+Esc.
+6. Press **Win+Shift+S** (or Print Screen), select an area and paste it with Ctrl+V in TextEdit.
+7. In **Terminal**, run `sleep 100` and press **Ctrl+C**. The process should stop, because Terminal is ignored by default.
+8. From the menu, try **Pause**, turning a group off, **Ignore "current app"**, and **Quit**.
 
-> **Recompilou?** Na sua máquina, `make app` assina sempre com o mesmo certificado local (`scripts/dev-signing.sh`, guardado em `~/.ronic-mirror-signing` e compartilhado com o Ronic Mirror). Assim a permissão de Acessibilidade **continua valendo depois de recompilar**. No CI, a assinatura é ad-hoc, e o app trata a troca de versão sozinho, como descrito em [Instalação](#instalação).
+> **Rebuilt the app?** On your machine, `make app` always signs with the same local certificate (`scripts/dev-signing.sh`, stored in `~/.ronic-mirror-signing` and shared with Ronic Mirror). That way the Accessibility permission **keeps working after rebuilding**. On CI, signing is ad-hoc, and the app handles the version change on its own, as described in [Installation](#installation).
 
-## Publicar uma nova versão
+## Publishing a new version
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.3.0
+git push origin v1.3.0
 ```
 
-O workflow [release.yml](.github/workflows/release.yml) compila o app universal (Apple Silicon + Intel) e cria o Release com `RonicMacToWindows-macOS.zip`. O botão de download deste README aponta sempre para a versão mais recente.
+The [release.yml](.github/workflows/release.yml) workflow builds the universal app (Apple Silicon + Intel) and creates the Release with `RonicMacToWindows-macOS.zip`. The download button in this README always points to the latest version.
 
-**Para distribuir sem avisos de segurança (opcional):** assine com *Developer ID* e faça a notarização: `SIGN_IDENTITY="Developer ID Application: …" ./scripts/package-macos.sh`, depois `xcrun notarytool submit …`.
+**To distribute without security warnings (optional):** sign with a *Developer ID* and notarize: `SIGN_IDENTITY="Developer ID Application: …" ./scripts/package-macos.sh`, then `xcrun notarytool submit …`.
 
-## Limitações conhecidas
+## Known limitations
 
-* **Campos de senha:** quando um campo seguro está em foco, o macOS bloqueia a interceptação de teclado. Nesses campos, os atalhos do Mac (⌘C, ⌘V) continuam valendo.
-* **Home/End em textos com quebra automática** vão ao início e ao fim do *parágrafo*, não da linha visual.
-* **Alt+Tab** alterna entre apps, como o ⌘Tab, e não entre janelas individuais.
-* **Layouts não QWERTY** (Dvorak, Colemak): os atalhos seguem a posição física das teclas QWERTY/ABNT2.
-* **Win+L e Win+D** usam APIs internas do macOS. Se a Apple remover essas APIs, o app usa um plano B: ⌃⌘Q para bloquear e ocultar os apps para mostrar a mesa.
-* **Não está na Mac App Store**, porque o sandbox da loja não permite CGEventTap que modifica eventos.
+* **Password fields:** while a secure text field has focus, macOS blocks keyboard interception. In those fields, the Mac shortcuts (⌘C, ⌘V) still work.
+* **Home/End in soft-wrapped text** go to the start and end of the *paragraph*, not the visual line.
+* **Alt+Tab** switches between apps, like ⌘Tab, not between individual windows.
+* **Non-QWERTY layouts** (Dvorak, Colemak): shortcuts follow the physical QWERTY/ABNT2 key positions.
+* **Win+L and Win+D** use internal macOS APIs. If Apple removes them, the app falls back to ⌃⌘Q to lock and to hiding apps to show the desktop.
+* **Not on the Mac App Store**, because the store's sandbox doesn't allow a CGEventTap that modifies events.
 
-## Licença
+## License
 
-Defina a licença do projeto antes de distribuir (por exemplo, MIT).
+Choose a license for the project before distributing it (for example, MIT).

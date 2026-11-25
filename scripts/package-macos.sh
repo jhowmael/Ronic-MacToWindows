@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
-# Empacota a Ronic MacToWindows:
+# Packages Ronic MacToWindows:
 #   dist/RonicMacToWindows.app
-#   dist/RonicMacToWindows-macOS.zip   (pronto para anexar no GitHub Releases)
+#   dist/RonicMacToWindows-macOS.zip   (ready to attach to GitHub Releases)
 #
-# Variáveis opcionais:
-#   VERSION=1.1.0            versão gravada no Info.plist
-#   UNIVERSAL=1              binário universal (arm64 + x86_64) — requer Xcode completo
-#   SIGN_IDENTITY="Developer ID Application: Fulano (TEAMID)"   assinatura real
+# Optional variables:
+#   VERSION=1.3.0            version written to Info.plist
+#   UNIVERSAL=1              universal binary (arm64 + x86_64) — requires full Xcode
+#   SIGN_IDENTITY="Developer ID Application: Jane Doe (TEAMID)"   real signing identity
 #
-# Assinatura padrão:
-#   - na sua máquina: certificado local estável (scripts/dev-signing.sh), assim a permissão de
-#     Acessibilidade continua valendo depois de recompilar;
-#   - no CI (variável CI definida): ad-hoc ("-"). Ao atualizar, o app detecta a chave órfã
-#     da versão anterior e pede a permissão de novo sozinho.
+# Default signing:
+#   - on your machine: stable local certificate (scripts/dev-signing.sh), so the
+#     Accessibility permission keeps working after rebuilding;
+#   - on CI (CI variable set): ad-hoc ("-"). After an update, the app detects the orphaned
+#     entry left by the previous version and asks for the permission again on its own.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -32,7 +32,7 @@ echo "==> Ronic MacToWindows $VERSION"
 rm -rf "$APP"
 mkdir -p "$DIST"
 
-# 1) Compila (release, otimizado)
+# 1) Build (release, optimized)
 SWIFT_ARGS=(-c release --package-path "$ROOT")
 if [[ "${UNIVERSAL:-0}" == "1" ]]; then
   SWIFT_ARGS+=(--arch arm64 --arch x86_64)
@@ -40,8 +40,8 @@ fi
 swift build "${SWIFT_ARGS[@]}"
 BIN_DIR="$(swift build "${SWIFT_ARGS[@]}" --show-bin-path)"
 
-# 2) Monta o bundle .app
-echo "==> Montando $APP"
+# 2) Assemble the .app bundle
+echo "==> Assembling $APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN_DIR/RonicMacToWindows" "$APP/Contents/MacOS/RonicMacToWindows"
 cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
@@ -50,8 +50,8 @@ plutil -replace CFBundleShortVersionString -string "$VERSION" "$APP/Contents/Inf
 plutil -replace CFBundleVersion -string "$(date +%Y%m%d%H%M)" "$APP/Contents/Info.plist"
 strip -x "$APP/Contents/MacOS/RonicMacToWindows" 2>/dev/null || true
 
-# 3) Assinatura (ad-hoc por padrão)
-echo "==> Assinando ($SIGN_IDENTITY)"
+# 3) Code signing
+echo "==> Signing ($SIGN_IDENTITY)"
 SIGN_FLAGS=(--force --sign "$SIGN_IDENTITY")
 if [[ "$SIGN_IDENTITY" == Developer\ ID* ]]; then
   SIGN_FLAGS+=(--options runtime --timestamp)
@@ -59,13 +59,13 @@ fi
 codesign "${SIGN_FLAGS[@]}" "$APP"
 codesign --verify --strict "$APP"
 
-# 4) Zip para o GitHub Releases (ditto preserva assinatura e atributos)
+# 4) Zip for GitHub Releases (ditto keeps the signature and attributes)
 ZIP="$DIST/RonicMacToWindows-macOS.zip"
 rm -f "$ZIP"
 ditto -c -k --keepParent "$APP" "$ZIP"
 
 echo
-echo "Pronto:"
+echo "Done:"
 echo "  App: $APP"
 echo "  Zip: $ZIP"
-echo "Abra com: open \"$APP\""
+echo "Open with: open \"$APP\""

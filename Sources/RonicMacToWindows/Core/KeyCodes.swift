@@ -1,8 +1,8 @@
 import CoreGraphics
 
-/// Códigos virtuais de tecla (posição física, iguais a `kVK_*` do Carbon).
-/// São literais para que o compilador os trate como constantes no caminho quente do event tap.
-/// Valem para os layouts ANSI e ABNT2 (as letras ficam nas mesmas posições).
+/// Virtual key codes (physical position, same as Carbon's `kVK_*`).
+/// They are literals so the compiler treats them as constants on the event tap's hot path.
+/// Valid for ANSI and ABNT2 layouts (letters sit in the same positions).
 enum Key {
     static let a: UInt16 = 0x00
     static let s: UInt16 = 0x01
@@ -36,7 +36,7 @@ enum Key {
     static let tab: UInt16 = 0x30
     static let backspace: UInt16 = 0x33
     static let escape: UInt16 = 0x35
-    static let f13: UInt16 = 0x69   // "Print Screen" em teclados de PC ligados ao Mac
+    static let f13: UInt16 = 0x69   // "Print Screen" on PC keyboards connected to a Mac
     static let home: UInt16 = 0x73
     static let forwardDelete: UInt16 = 0x75
     static let f4: UInt16 = 0x76
@@ -47,9 +47,9 @@ enum Key {
     static let up: UInt16 = 0x7E
 }
 
-/// Bits de `CGEventFlags`, incluindo os bits "dependentes de dispositivo" (lado esquerdo/direito,
-/// de IOLLEvent.h). Ao trocar um modificador, removemos também esses bits; senão alguns apps
-/// continuam enxergando o Control "fantasma".
+/// `CGEventFlags` bits, including the "device-dependent" bits (left/right side, from
+/// IOLLEvent.h). When swapping a modifier we clear those bits too; otherwise some apps keep
+/// seeing a "ghost" Control key.
 enum Mask {
     static let control: UInt64 = 0x0004_0000
     static let shift: UInt64 = 0x0002_0000
@@ -58,7 +58,7 @@ enum Mask {
     static let numericPad: UInt64 = 0x0020_0000
     static let secondaryFn: UInt64 = 0x0080_0000
 
-    // Bits de dispositivo (NX_DEVICE*KEYMASK)
+    // Device bits (NX_DEVICE*KEYMASK)
     static let devLeftCtrl: UInt64 = 0x0000_0001
     static let devLeftShift: UInt64 = 0x0000_0002
     static let devLeftCmd: UInt64 = 0x0000_0008
@@ -67,25 +67,25 @@ enum Mask {
     static let devRightOpt: UInt64 = 0x0000_0040
     static let devRightCtrl: UInt64 = 0x0000_2000
 
-    /// Tudo que identifica cada modificador (genérico + esquerdo + direito).
+    /// Everything that identifies each modifier (generic + left + right).
     static let anyControl = control | devLeftCtrl | devRightCtrl
     static let anyCommand = command | devLeftCmd | devRightCmd
     static let anyOption = option | devLeftOpt | devRightOpt
 
-    /// Setas, Home/End e Delete carregam esses bits; letras não.
+    /// Arrows, Home/End and Delete carry these bits; letters don't.
     static let fnPad = numericPad | secondaryFn
 
-    /// Modificadores emitidos (sempre como "lado esquerdo").
+    /// Emitted modifiers (always as the "left side" key).
     static let outControl = control | devLeftCtrl
     static let outCommand = command | devLeftCmd
     static let outOption = option | devLeftOpt
     static let outShift = shift | devLeftShift
 }
 
-/// Caracteres usados quando o keyCode muda (o AppKit recalcula a partir de keyCode+flags,
-/// mas apps não-AppKit leem a string do CGEvent).
+/// Characters used when the keyCode changes (AppKit recomputes them from keyCode+flags,
+/// but non-AppKit apps read the CGEvent's string).
 enum KeyChar {
-    static let ctrlA: UniChar = 0x61   // "a" (o AppKit usa como charactersIgnoringModifiers)
+    static let ctrlA: UniChar = 0x61   // "a" (AppKit uses it as charactersIgnoringModifiers)
     static let ctrlE: UniChar = 0x65   // "e"
     static let q: UniChar = 0x71
     static let z: UniChar = 0x7A

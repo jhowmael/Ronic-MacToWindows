@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
-# Certificado local de assinatura de código, compartilhado pela família Ronic (mesmo keychain
-# usado pelo Ronic Mirror). Criado uma única vez; depois só é reutilizado.
+# Local code-signing certificate shared by the Ronic family (same keychain used by
+# Ronic Mirror). Created once; reused afterwards.
 #
-# Por quê: o macOS amarra a permissão de Acessibilidade à assinatura do app. Com assinatura
-# ad-hoc, cada recompilação vira um "app diferente": a chave em Ajustes continua ligada, mas
-# não vale para o binário novo. Assinando sempre com o MESMO certificado, o requisito vira
-# `identifier "…" and certificate leaf = H"…"` e a permissão sobrevive às recompilações.
+# Why: macOS ties the Accessibility permission to the app's signature. With ad-hoc signing,
+# every rebuild becomes a "different app": the toggle in Settings stays on but doesn't apply
+# to the new binary. Signing with the SAME certificate every time turns the requirement into
+# `identifier "…" and certificate leaf = H"…"`, so the permission survives rebuilds.
 #
-# Fica num keychain próprio em ~/.ronic-mirror-signing (fora do repositório). Não mexe no
-# keychain de login nem marca nada como confiável no sistema.
-# Saída (stdout): o hash SHA-1 da identidade, para `codesign --sign <hash>`.
+# Lives in its own keychain at ~/.ronic-mirror-signing (outside the repository). It does not
+# touch the login keychain and does not mark anything as trusted system-wide.
+# Output (stdout): the identity's SHA-1 hash, for `codesign --sign <hash>`.
 set -euo pipefail
 
 DIR="$HOME/.ronic-mirror-signing"
@@ -41,7 +41,7 @@ CNF
     -name "$NAME" -out "$TMP/id.p12" -passout "pass:$PASS" >/dev/null 2>&1
 
   security create-keychain -p "$PASS" "$KC" >/dev/null
-  security set-keychain-settings "$KC"            # sem bloqueio automático
+  security set-keychain-settings "$KC"            # no auto-lock
   security unlock-keychain -p "$PASS" "$KC"
   security import "$TMP/id.p12" -k "$KC" -P "$PASS" -T /usr/bin/codesign >/dev/null
   security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$PASS" "$KC" >/dev/null
@@ -49,7 +49,7 @@ fi
 
 security unlock-keychain -p "$PASS" "$KC"
 
-# Garante que o keychain está na lista de busca do usuário (exigência do codesign).
+# Make sure the keychain is in the user's search list (required by codesign).
 current=$(security list-keychains -d user | sed 's/^ *"//; s/"$//')
 if ! grep -qxF "$KC" <<<"$current"; then
   # shellcheck disable=SC2086

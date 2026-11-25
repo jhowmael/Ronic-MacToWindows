@@ -1,6 +1,6 @@
 import os
 
-/// Grupos de atalhos que podem ser ligados/desligados no menu.
+/// Shortcut groups that can be switched on/off from the menu.
 struct ShortcutGroups: OptionSet, Sendable {
     let rawValue: UInt8
 
@@ -13,22 +13,22 @@ struct ShortcutGroups: OptionSet, Sendable {
     /// Win+L, Win+D (Win = ⌘)
     static let winKey = ShortcutGroups(rawValue: 1 << 3)
 
-    /// PrtSc, Win+Shift+S, ⇧⌘3 e ⇧⌘4 → print direto na área de transferência
+    /// PrtSc, Win+Shift+S, ⇧⌘3 and ⇧⌘4 → screenshot straight to the clipboard
     static let screenshots = ShortcutGroups(rawValue: 1 << 4)
 
     static let all: ShortcutGroups = [.editing, .textNavigation, .windows, .winKey, .screenshots]
 }
 
-/// Tudo o que o callback do event tap precisa saber, num único valor pequeno.
+/// Everything the event tap callback needs to know, in one small value.
 struct RemapSnapshot: Sendable {
     var enabled = true
     var frontmostExcluded = false
     var groups: ShortcutGroups = .all
 }
 
-/// Ponte entre a thread principal (que escreve quando algo muda) e a thread do event tap
-/// (que lê a cada tecla). Um `os_unfair_lock` custa dezenas de nanossegundos: nada de I/O,
-/// nada de dicionário, nada de alocação no caminho quente.
+/// Bridge between the main thread (which writes when something changes) and the event tap
+/// thread (which reads on every keystroke). An `os_unfair_lock` costs tens of nanoseconds:
+/// no I/O, no dictionaries, no allocation on the hot path.
 final class SharedState: @unchecked Sendable {
     static let shared = SharedState()
 

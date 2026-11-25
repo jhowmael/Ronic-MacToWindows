@@ -1,9 +1,9 @@
 import AppKit
 import Darwin
 
-/// Ações de sistema disparadas pelos atalhos (sempre na thread principal, fora do callback).
+/// System actions triggered by shortcuts (always on the main thread, outside the callback).
 enum SystemActions {
-    // APIs privadas carregadas sob demanda, com plano B público caso desapareçam.
+    // Private APIs loaded on demand, with a public fallback in case they disappear.
     private typealias CoreDockSendNotificationFn = @convention(c) (CFString, UnsafeMutableRawPointer?) -> Void
     private typealias LockScreenFn = @convention(c) () -> Int32
 
@@ -25,12 +25,12 @@ enum SystemActions {
         if let lock = lockScreenImmediate {
             _ = lock()
         } else {
-            // Atalho nativo do macOS para bloquear: ⌃⌘Q
+            // Native macOS lock shortcut: ⌃⌘Q
             postShortcut(Key.q, flags: [.maskControl, .maskCommand])
         }
     }
 
-    /// Win+D — alterna "Mostrar Mesa" (mesmo efeito do gesto/F11 do Mission Control).
+    /// Win+D — toggles "Show Desktop" (same as the Mission Control gesture/F11).
     static func showDesktop() {
         if let send = coreDockSend {
             send("com.apple.showdesktop.awake" as CFString, nil)
@@ -41,21 +41,21 @@ enum SystemActions {
         }
     }
 
-    /// Print Screen (F13) — abre a barra do Screenshot, como ⇧⌘5.
+    /// Print Screen (F13) — opens the Screenshot toolbar, like ⇧⌘5.
     static func openScreenshotTool() {
         if !openApp(at: "/System/Applications/Utilities/Screenshot.app") {
             postShortcut(Key.five, flags: [.maskCommand, .maskShift])
         }
     }
 
-    /// Print direto para a área de transferência, como no Windows: dispara o atalho nativo
-    /// ⌃⇧⌘3 (tela inteira) ou ⌃⇧⌘4 (recorte; Espaço alterna para "janela").
-    /// A captura é feita pelo próprio macOS, sem pedir permissão de Gravação de Tela ao app.
+    /// Screenshot straight to the clipboard, like on Windows: fires the native shortcut
+    /// ⌃⇧⌘3 (full screen) or ⌃⇧⌘4 (snip; Space switches to "window").
+    /// macOS itself takes the capture, so the app never needs Screen Recording permission.
     static func screenshotToClipboard(fullScreen: Bool) {
         postShortcut(fullScreen ? Key.three : Key.four, flags: [.maskControl, .maskCommand, .maskShift])
     }
 
-    /// Ctrl+Shift+Esc — Monitor de Atividade, o "Gerenciador de Tarefas" do Mac.
+    /// Ctrl+Shift+Esc — Activity Monitor, the Mac's "Task Manager".
     static func openTaskManager() {
         _ = openApp(at: "/System/Applications/Utilities/Activity Monitor.app")
     }
@@ -69,7 +69,7 @@ enum SystemActions {
         return true
     }
 
-    /// Posta um atalho marcado como sintético, para o nosso tap deixá-lo passar.
+    /// Posts a shortcut tagged as synthetic so our own tap lets it through.
     static func postShortcut(_ key: UInt16, flags: CGEventFlags) {
         let source = CGEventSource(stateID: .hidSystemState)
         source?.userData = RemapEngine.syntheticMarker

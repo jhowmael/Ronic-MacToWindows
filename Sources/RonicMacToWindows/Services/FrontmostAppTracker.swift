@@ -1,8 +1,8 @@
 import AppKit
 
-/// Mantém em memória o app ativo e a ordem de uso recente (MRU) dos apps.
-/// Atualizado por notificação do NSWorkspace (zero polling); o callback do teclado
-/// só lê um Bool pré-calculado a partir daqui.
+/// Keeps the frontmost app and the most-recently-used (MRU) app order in memory.
+/// Updated by NSWorkspace notifications (zero polling); the keyboard callback only reads
+/// a Bool precomputed from here.
 @MainActor
 final class FrontmostAppTracker {
     private(set) var currentApp: NSRunningApplication?
@@ -36,7 +36,7 @@ final class FrontmostAppTracker {
     }
 
     private func didActivate(_ app: NSRunningApplication?) {
-        // O próprio Ronic (menu, painel de "Adicionar app…") não conta como app ativo.
+        // Ronic itself (menu, "Add app…" panel) doesn't count as the frontmost app.
         guard let app, app.processIdentifier != selfPID else { return }
         currentApp = app
         let pid = app.processIdentifier
@@ -54,8 +54,7 @@ final class FrontmostAppTracker {
         }
     }
 
-    /// Apps com janela no Dock, do mais recente ao mais antigo. Só é montado quando o
-    /// Alt+Tab é acionado.
+    /// Apps shown in the Dock, most recent first. Only built when Alt+Tab fires.
     func switchableApps() -> [NSRunningApplication] {
         let apps = NSWorkspace.shared.runningApplications.filter {
             $0.activationPolicy == .regular && !$0.isTerminated && $0.processIdentifier != selfPID

@@ -1,8 +1,8 @@
 name: Release
 
-# Publica o download no GitHub Releases ao criar uma tag "v*":
+# Publishes the download to GitHub Releases when a "v*" tag is pushed:
 #   git tag v1.0.0 && git push origin v1.0.0
-# Também pode ser disparado manualmente (gera só o artefato do workflow, sem Release).
+# Can also be run manually (builds the workflow artifact only, no Release).
 on:
   push:
     tags: ["v*"]
@@ -17,12 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Versão
+      - name: Version
         run: |
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then V="${GITHUB_REF_NAME#v}"; else V="0.0.0-dev"; fi
           echo "VERSION=$V" >> "$GITHUB_ENV"
 
-      - name: Empacotar (universal arm64 + x86_64)
+      - name: Package (universal arm64 + x86_64)
         run: UNIVERSAL=1 ./scripts/package-macos.sh
 
       - uses: actions/upload-artifact@v4
@@ -40,17 +40,17 @@ jobs:
           path: dist
           merge-multiple: true
 
-      - name: Publicar no Release
+      - name: Publish Release
         uses: softprops/action-gh-release@v2
         with:
           name: Ronic MacToWindows ${{ github.ref_name }}
           generate_release_notes: true
           body: |
             ## Download
-            | Sistema | Arquivo |
+            | System | File |
             |---|---|
-            | macOS 14 Sonoma ou mais recente (Apple Silicon e Intel) | **RonicMacToWindows-macOS.zip** |
+            | macOS 14 Sonoma or later (Apple Silicon and Intel) | **RonicMacToWindows-macOS.zip** |
 
-            Instalação e lista de atalhos: veja o [README](https://github.com/jhowmael/Ronic-MacToWindows#instalação).
+            Installation and the full shortcut list: see the [README](https://github.com/jhowmael/Ronic-MacToWindows#installation).
           files: |
             dist/RonicMacToWindows-macOS.zip

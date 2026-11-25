@@ -31,7 +31,7 @@
 	<key>NSHighResolutionCapable</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>Ronic MacToWindows — atalhos do Windows no macOS.</string>
+	<string>Ronic MacToWindows — Windows shortcuts on macOS.</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSSupportsAutomaticTermination</key>

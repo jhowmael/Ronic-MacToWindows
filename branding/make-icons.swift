@@ -1,10 +1,10 @@
-// Gera o logo da Ronic MacToWindows: um "R" atravessando um portal de conversão,
-// saindo do prata (macOS) e chegando ao azul (Windows), com rastros de movimento.
+// Generates the Ronic MacToWindows logo: an "R" passing through a conversion portal,
+// leaving the silver (macOS) and arriving at the blue (Windows), with motion streaks.
 //
-//   swift branding/make-icons.swift [pasta-de-saída]
+//   swift branding/make-icons.swift [output-folder]
 //
-// Saídas: logo-<N>.png para N em 16…1024 (quadrado arredondado, fundo transparente).
-// Use ./branding/make-icons.sh para gerar também o AppIcon.icns.
+// Output: logo-<N>.png for N in 16…1024 (rounded square, transparent background).
+// Use ./branding/make-icons.sh to also build AppIcon.icns.
 import AppKit
 import CoreText
 import Foundation
@@ -16,7 +16,7 @@ func color(_ hex: UInt32, _ a: CGFloat = 1) -> CGColor {
     CGColor(red: CGFloat((hex >> 16) & 0xFF) / 255, green: CGFloat((hex >> 8) & 0xFF) / 255, blue: CGFloat(hex & 0xFF) / 255, alpha: a)
 }
 
-/// Caminho vetorial de uma letra (SF Pro Rounded Black, como na Ronic Mirror).
+/// Vector path of a letter (SF Pro Rounded Black, like Ronic Mirror).
 func glyphPath(_ char: String, size: CGFloat) -> CGPath {
     let font = CTFontCreateWithName("SFProRounded-Black" as CFString, size, nil)
     let fallback = NSFont.systemFont(ofSize: size, weight: .black) as CTFont
@@ -34,20 +34,20 @@ func render(size px: Int) -> Data {
                         bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)!
     ctx.setShouldAntialias(true)
     ctx.interpolationQuality = .high
-    let small = px <= 32   // em tamanhos pequenos, menos detalhe e traços mais grossos
-    let tiny = px <= 24    // 16–24 px: sem rastros, letra maior e centralizada
+    let small = px <= 32   // small sizes: less detail, thicker strokes
+    let tiny = px <= 24    // 16–24 px: no streaks, bigger centered letter
 
-    // ---- Geometria da letra e do portal ----
+    // ---- Letter and portal geometry ----
     let glyph = glyphPath("R", size: s * (tiny ? 0.66 : 0.54))
     let gb = glyph.boundingBoxOfPath
-    let letterX = s * (tiny ? 0.5 : 0.545) - gb.width / 2 - gb.minX        // R levemente à direita: espaço para os rastros
+    let letterX = s * (tiny ? 0.5 : 0.545) - gb.width / 2 - gb.minX        // R slightly to the right: room for the streaks
     let letterY = (s - gb.height) / 2 - gb.minY
     var t = CGAffineTransform(translationX: letterX, y: letterY)
     let letter = glyph.copy(using: &t)!
     let lb = letter.boundingBoxOfPath
-    let portalX = lb.minX + lb.width * 0.52                 // o portal corta o R pouco depois do meio
+    let portalX = lb.minX + lb.width * 0.52                 // the portal cuts the R just past its middle
 
-    // ---- Fundo: quadrado arredondado, prata → azul Windows (horizontal, no sentido do movimento) ----
+    // ---- Background: rounded square, silver → Windows blue (horizontal, in the direction of motion) ----
     let inset = s * 0.04
     let rect = CGRect(x: inset, y: inset, width: s - inset * 2, height: s - inset * 2)
     let radius = rect.width * 0.225
@@ -63,12 +63,12 @@ func render(size px: Int) -> Data {
                                 locations: [0, 0.22, p - 0.06, p + 0.04, 0.78, 1])!
     ctx.drawLinearGradient(bgGradient, start: CGPoint(x: 0, y: s * 0.55), end: CGPoint(x: s, y: s * 0.45), options: [])
 
-    // Brilho suave no topo (efeito vidro, igual à família Ronic).
+    // Soft shine at the top (glass effect, same as the rest of the Ronic family).
     let shine = CGGradient(colorsSpace: cs, colors: [color(0xFFFFFF, 0.30), color(0xFFFFFF, 0)] as CFArray, locations: [0, 1])!
     ctx.drawRadialGradient(shine, startCenter: CGPoint(x: s * 0.3, y: s * 0.95), startRadius: 0,
                            endCenter: CGPoint(x: s * 0.3, y: s * 0.95), endRadius: s * 0.75, options: [])
 
-    // ---- Rastros de movimento (o R vem da esquerda, em velocidade) ----
+    // ---- Motion streaks (the R comes in fast from the left) ----
     let streaks: [(y: CGFloat, length: CGFloat, thick: CGFloat, alpha: CGFloat)] = tiny ? [] : small
         ? [(0.62, 0.20, 0.045, 0.75), (0.40, 0.14, 0.045, 0.55)]
         : [(0.80, 0.16, 0.022, 0.45), (0.64, 0.30, 0.030, 0.85), (0.48, 0.20, 0.026, 0.65),
@@ -88,8 +88,8 @@ func render(size px: Int) -> Data {
         ctx.restoreGState()
     }
 
-    // ---- O R: grafite metálico antes do portal (macOS), branco depois (Windows) ----
-    // Sombra suave sob a letra inteira.
+    // ---- The R: metallic graphite before the portal (macOS), white after it (Windows) ----
+    // Soft shadow under the whole letter.
     ctx.saveGState()
     ctx.setShadow(offset: CGSize(width: 0, height: -s * 0.012), blur: s * 0.03, color: color(0x0A1A33, 0.35))
     ctx.addPath(letter)
@@ -97,7 +97,7 @@ func render(size px: Int) -> Data {
     ctx.fillPath()
     ctx.restoreGState()
 
-    // Metade "mac": grafite com reflexo metálico.
+    // "Mac" half: graphite with a metallic sheen.
     ctx.saveGState()
     ctx.addPath(letter)
     ctx.clip()
@@ -108,7 +108,7 @@ func render(size px: Int) -> Data {
     ctx.drawLinearGradient(metal, start: CGPoint(x: 0, y: lb.maxY), end: CGPoint(x: 0, y: lb.minY), options: [])
     ctx.restoreGState()
 
-    // Metade "windows": branco puro (já preenchido pela sombra) + leve azulado na borda do portal.
+    // "Windows" half: pure white (already filled by the shadow pass) + a light blue tint at the portal edge.
     ctx.saveGState()
     ctx.addPath(letter)
     ctx.clip()
@@ -117,7 +117,7 @@ func render(size px: Int) -> Data {
     ctx.drawLinearGradient(tint, start: CGPoint(x: portalX, y: 0), end: CGPoint(x: portalX + lb.width * 0.35, y: 0), options: [])
     ctx.restoreGState()
 
-    // ---- Portal de conversão: linha vertical luminosa com halo, que some nas pontas ----
+    // ---- Conversion portal: glowing vertical line with a halo that fades at both ends ----
     let top = lb.maxY + s * 0.085, bottom = lb.minY - s * 0.085
     let glowW = s * (small ? 0.09 : 0.07)
     ctx.saveGState()
@@ -146,4 +146,4 @@ for size in [16, 20, 24, 32, 40, 48, 64, 128, 180, 256, 512, 1024] {
     let url = outDir.appendingPathComponent("logo-\(size).png")
     try render(size: size).write(to: url)
 }
-print("Ícones gerados em \(outDir.path)")
+print("Icons generated in \(outDir.path)")

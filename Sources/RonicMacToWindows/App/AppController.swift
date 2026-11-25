@@ -1,7 +1,7 @@
 import AppKit
 
-/// Liga as peças: preferências, app ativo, permissão, event tap, Alt+Tab e menu.
-/// Tudo aqui roda na thread principal; o event tap só recebe um snapshot atualizado.
+/// Wires the pieces together: preferences, frontmost app, permission, event tap, Alt+Tab and menu.
+/// Everything here runs on the main thread; the event tap only receives an updated snapshot.
 @MainActor
 final class AppController {
     let settings = Settings()
@@ -30,10 +30,10 @@ final class AppController {
         }
 
         if !AccessibilityPermission.isTrusted {
-            // Sem permissão ao abrir: quase sempre é uma atualização do app. A chave em
-            // Ajustes › Acessibilidade continua ligada, mas pertence ao binário anterior, e
-            // ligar/desligar não resolve. Removemos a entrada (órfã ou desligada) e pedimos de
-            // novo: o usuário só precisa ligar a chave. Sem entrada, o reset não faz nada.
+            // No permission at launch: almost always an app update. The toggle in
+            // Settings › Accessibility is still on, but it belongs to the previous binary, and
+            // toggling it doesn't help. Remove the entry (orphaned or disabled) and ask again:
+            // the user only has to switch it on. With no entry, the reset does nothing.
             AccessibilityPermission.resetEntry()
             AccessibilityPermission.requestPrompt()
         }
@@ -45,10 +45,10 @@ final class AppController {
         engine.stop()
     }
 
-    // MARK: - Permissão
+    // MARK: - Permission
 
-    /// Cria o tap assim que a permissão existir. Enquanto não existir, confere a cada 2 s
-    /// (timer leve que se desliga sozinho depois de autorizado).
+    /// Creates the tap as soon as permission exists. Until then, checks every 2 s
+    /// (a light timer that stops itself once permission is granted).
     func refreshPermissionAndEngine() {
         if AccessibilityPermission.isTrusted, !engine.isRunning, engine.start() {
             engine.setActive(settings.isEnabled)
@@ -68,7 +68,7 @@ final class AppController {
         statusMenu.refreshIcon()
     }
 
-    /// "Ativei e continua não autorizado": remove a entrada antiga, pede de novo e abre os Ajustes.
+    /// "I enabled it and it still says not authorized": removes the old entry, asks again and opens Settings.
     func resetPermission() {
         AccessibilityPermission.resetEntry()
         AccessibilityPermission.requestPrompt()
@@ -76,7 +76,7 @@ final class AppController {
         refreshPermissionAndEngine()
     }
 
-    /// Reabre o app (último recurso quando o macOS só libera a captura num processo novo).
+    /// Relaunches the app (last resort when macOS only allows the tap in a fresh process).
     func relaunch() {
         let path = Bundle.main.bundlePath
         let task = Process()
@@ -86,7 +86,7 @@ final class AppController {
         NSApp.terminate(nil)
     }
 
-    // MARK: - Ações do menu
+    // MARK: - Menu actions
 
     func setEnabled(_ enabled: Bool) {
         settings.isEnabled = enabled
@@ -116,7 +116,7 @@ final class AppController {
         syncExclusion()
     }
 
-    // MARK: - Estado para o event tap
+    // MARK: - State for the event tap
 
     private func syncState() {
         let enabled = settings.isEnabled
@@ -134,7 +134,7 @@ final class AppController {
         SharedState.shared.update { $0.frontmostExcluded = excluded }
     }
 
-    // MARK: - Ações vindas do teclado
+    // MARK: - Actions coming from the keyboard
 
     private func perform(_ action: EngineAction) {
         switch action {

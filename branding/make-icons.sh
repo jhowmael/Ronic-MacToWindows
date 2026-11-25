@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Gera todos os ícones da Ronic MacToWindows a partir de branding/make-icons.swift.
-# Rode no macOS:  ./branding/make-icons.sh
+# Generates every Ronic MacToWindows icon from branding/make-icons.swift.
+# Run on macOS:  ./branding/make-icons.sh
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/branding/out"

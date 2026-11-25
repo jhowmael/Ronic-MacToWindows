@@ -1,7 +1,7 @@
 import AppKit
 
-/// Painel flutuante do Alt+Tab: grade de ícones com o app selecionado destacado.
-/// Não rouba o foco (nonactivatingPanel) e aparece em qualquer Space, inclusive em tela cheia.
+/// Floating Alt+Tab panel: icon grid with the selected app highlighted.
+/// Never steals focus (nonactivatingPanel) and shows on every Space, including full screen.
 final class SwitcherPanel: NSPanel {
     private let cell: CGFloat = 96
     private let iconSize: CGFloat = 64

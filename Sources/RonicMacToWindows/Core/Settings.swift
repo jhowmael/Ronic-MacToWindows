@@ -1,9 +1,9 @@
 import Foundation
 
-/// Preferências persistidas em UserDefaults. Lidas na inicialização e gravadas só quando
-/// o usuário muda algo no menu. Nunca acessadas pelo callback do teclado.
+/// Preferences persisted in UserDefaults. Read at launch and written only when the user
+/// changes something in the menu. Never touched by the keyboard callback.
 final class Settings {
-    /// Apps em que o Control original é preservado (terminais, VMs, área de trabalho remota).
+    /// Apps where the original Control key is preserved (terminals, VMs, remote desktop).
     static let defaultExcludedBundleIDs: [String] = [
         "com.apple.Terminal",
         "com.googlecode.iterm2",
@@ -12,7 +12,7 @@ final class Settings {
         "net.kovidgoyal.kitty",
         "org.alacritty",
         "com.github.wez.wezterm",
-        "com.microsoft.rdc.macos",        // Windows App / Área de Trabalho Remota
+        "com.microsoft.rdc.macos",        // Windows App / Remote Desktop
         "com.parallels.desktop.console",
         "com.vmware.fusion",
         "com.utmapp.UTM",
@@ -26,7 +26,7 @@ final class Settings {
 
     private let defaults = UserDefaults.standard
 
-    /// Ao abrir o app, o remapeamento começa sempre ativo (abrir o app = querer usá-lo).
+    /// Remapping always starts enabled at launch (opening the app = wanting to use it).
     var isEnabled = true
 
     var groups: ShortcutGroups {
@@ -41,8 +41,8 @@ final class Settings {
 
     init() {
         if let stored = defaults.object(forKey: Keys.groups) as? Int {
-            // Grupos criados em versões mais novas começam ligados, mesmo para quem já tinha
-            // preferências salvas (a 1.0/1.1 só conheciam os 4 primeiros grupos).
+            // Groups added in newer versions start enabled, even for users who already had saved
+            // preferences (1.0/1.1 only knew the first 4 groups).
             let known = ShortcutGroups(rawValue: UInt8(truncatingIfNeeded: defaults.object(forKey: Keys.knownGroups) as? Int ?? 0b1111))
             groups = ShortcutGroups(rawValue: UInt8(truncatingIfNeeded: stored)).union(ShortcutGroups.all.subtracting(known))
         } else {

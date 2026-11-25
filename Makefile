@@ -1,14 +1,14 @@
 .PHONY: help build dev app universal icons install reset-permission clean
 
 help:
-	@echo "make build             - compila em modo release (swift build)"
-	@echo "make dev               - roda direto pelo terminal (swift run) — a permissão vai para o Terminal/IDE"
-	@echo "make app               - gera dist/RonicMacToWindows.app e o .zip para o GitHub Releases"
-	@echo "make universal         - igual a 'make app', binário universal (requer Xcode completo)"
-	@echo "make install           - gera o app e copia para /Applications"
-	@echo "make icons             - regenera o logo, branding/logo.png e Resources/AppIcon.icns"
-	@echo "make reset-permission  - apaga a permissão de Acessibilidade do app (use após recompilar)"
-	@echo "make clean             - remove artefatos de build"
+	@echo "make build             - compile in release mode (swift build)"
+	@echo "make dev               - run from the terminal (swift run) — permission goes to Terminal/your IDE"
+	@echo "make app               - build dist/RonicMacToWindows.app and the .zip for GitHub Releases"
+	@echo "make universal         - same as 'make app', universal binary (requires full Xcode)"
+	@echo "make install           - build the app and copy it to /Applications"
+	@echo "make icons             - regenerate the logo, branding/logo.png and Resources/AppIcon.icns"
+	@echo "make reset-permission  - remove the app's Accessibility entry (use if the toggle is on but not applied)"
+	@echo "make clean             - remove build artifacts"
 
 build:
 	swift build -c release
@@ -26,7 +26,7 @@ install: app
 	-osascript -e 'quit app "RonicMacToWindows"' 2>/dev/null
 	rm -rf /Applications/RonicMacToWindows.app
 	cp -R dist/RonicMacToWindows.app /Applications/
-	@echo "Instalado em /Applications/RonicMacToWindows.app"
+	@echo "Installed at /Applications/RonicMacToWindows.app"
 
 icons:
 	./branding/make-icons.sh

@@ -1,19 +1,19 @@
 import AppKit
 import ApplicationServices
 
-/// Permissão de Acessibilidade (necessária para um CGEventTap que modifica eventos).
+/// Accessibility permission (required for a CGEventTap that modifies events).
 enum AccessibilityPermission {
     static var isTrusted: Bool { AXIsProcessTrusted() }
 
-    /// Mostra o alerta do sistema que leva aos Ajustes (só aparece se ainda não autorizado).
+    /// Shows the system alert that leads to Settings (only appears while not yet authorized).
     static func requestPrompt() {
         let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
         _ = AXIsProcessTrustedWithOptions(options)
     }
 
-    /// Remove a entrada do app em Ajustes › Acessibilidade (`tccutil reset`, não precisa de admin).
-    /// Necessário depois de atualizar: a chave antiga aparece ligada, mas o macOS a amarrou à
-    /// assinatura do binário anterior e não a aplica ao novo.
+    /// Removes the app's entry in Settings › Accessibility (`tccutil reset`, no admin needed).
+    /// Needed after updating: the old toggle shows as on, but macOS tied it to the previous
+    /// binary's signature and doesn't apply it to the new one.
     @discardableResult
     static func resetEntry() -> Bool {
         guard let id = Bundle.main.bundleIdentifier else { return false }
@@ -36,8 +36,8 @@ enum AccessibilityPermission {
         NSWorkspace.shared.open(url)
     }
 
-    /// O sistema publica esta notificação quando a lista de apps autorizados muda.
-    /// Ela chega um pouco antes de a mudança valer, por isso o handler é chamado com atraso.
+    /// The system posts this notification when the list of authorized apps changes.
+    /// It arrives slightly before the change takes effect, so the handler runs with a delay.
     static func observeChanges(_ handler: @escaping () -> Void) -> NSObjectProtocol {
         DistributedNotificationCenter.default().addObserver(
             forName: NSNotification.Name("com.apple.accessibility.api"),
